@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 
-import models # critical import to start creating tables at startup
+from .import models # critical import to start creating tables at startup
 
-from core.database import engine
-from models.base import Base
+from app.core.database import engine
+from .models.base import Base
 
 # from route import router as exam_router
-from routes.user import router as user_router
-from routes.exam import router as exam_router
+from app.routes.user import router as user_router
+from app.routes.exam import router as exam_router
 
 
 # creating app

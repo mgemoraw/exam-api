@@ -7,7 +7,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, Float
 
 from datetime import datetime
-from models.base import Base
+from app.models.base import Base
 
 
 class Exam(Base):
