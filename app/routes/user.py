@@ -21,20 +21,7 @@ async def greetings():
 
 @router.post("/auth/login")
 async def login(user: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-# async def login(username:Optional[str] = Body(None), password: Optional[str]= Body(None), user_json: Optional[UserLogin] = None, db: Session = Depends(get_db)):
-
-	# if username and password:
-	# 	user = UserLogin(username=username, password=password)
-	
-	# elif user_json:
-	# 	user = user_json
-	
-	# else:
-	# 	raise HTTPException(
-	# 		status_code=400,
-	# 		detail="Invalid username or password"
-	# 		)
-	
+	# check if user exists
 	db_user = db.query(User).filter(User.username==user.username).first()
 	if db_user is None:
 		raise HTTPException(

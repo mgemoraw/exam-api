@@ -9,7 +9,7 @@ from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/auth/login")
 
-SECRET_KEY = "dump secrete key here change me"
+SECRET_KEY = "NKPD9W4hV/+YStZ+RejELM68Dw5okI5TrYrNWRcIf8q/OGfvxQXvtEirGA4yp9syAQkf3CWFqzH/nrV844dj8Q=="
 ALGORITHM = "HS256"
 
 
