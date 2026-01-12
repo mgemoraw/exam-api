@@ -2,8 +2,8 @@ from fastapi import FastAPI
 
 from .import models # critical import to start creating tables at startup
 
-from app.core.database import engine
-from .models.base import Base
+# from app.core.database import engine
+# from app.models import Base
 
 # from route import router as exam_router
 from app.routes.user import router as user_router
@@ -16,9 +16,9 @@ app = FastAPI()
 app.middleware("http")(auth_middleware)
 
 
-@app.on_event("startup")
-def startup():
-    Base.metadata.create_all(bind=engine)
+# @app.on_event("startup")
+# def startup():
+#     Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")
