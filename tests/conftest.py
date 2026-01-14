@@ -21,6 +21,12 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+TEST_USERNAME = "testuser"
+TEST_EMAIL = "test@example.com"
+TEST_PASSWORD = "TestPassword#123"
+
+
+
 @pytest.fixture(scope="function")
 def db():
     """Create a fresh database for each test."""
@@ -49,16 +55,17 @@ def client(db):
 @pytest.fixture(scope="function")
 def test_user(db):
     """Create a test user."""
-    user = User(
-        username="testuser",
-        email="test@example.com",
-        hashed_password=hash_password("testpassword"),
+    model = User(
+        username=TEST_USERNAME,
+        email=TEST_EMAIL,
+        hashed_password=hash_password(TEST_PASSWORD),
         is_active=True
     )
-    db.add(user)
+    db.add(model)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(model)
+    return model
+
 
 @pytest.fixture(scope="function")
 def test_user_token(test_user):

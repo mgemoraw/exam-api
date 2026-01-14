@@ -2,14 +2,16 @@
 import pytest
 from fastapi import status
 from app.core.security import create_access_token, verify_token
+from tests.conftest import TEST_USERNAME, TEST_EMAIL, TEST_PASSWORD
+
 
 def test_login_success(client, test_user):
     """Test successful login with form data."""
     response = client.post(
-        "/users/auth/login",
+        "/auth/login",
         data={
-            "username": "testuser",
-            "password": "testpassword"
+            "username": TEST_USERNAME,
+            "password": TEST_PASSWORD,
         }
     )
     
@@ -17,19 +19,21 @@ def test_login_success(client, test_user):
     data = response.json()
     assert "access_token" in data
     assert data["token_type"] == "bearer"
-    
+
     # Verify token is valid
     token_data = verify_token(data["access_token"])
     assert token_data is not None
 
 def test_login_json_success(client, test_user):
     """Test successful login with JSON body."""
+    data = {
+        "username": TEST_USERNAME,
+        "password": TEST_PASSWORD
+    }
+
     response = client.post(
         "/auth/login",
-        json={
-            "username": "testuser",
-            "password": "testpassword"
-        }
+        json=data
     )
     
     assert response.status_code == status.HTTP_200_OK
@@ -40,7 +44,7 @@ def test_login_wrong_password(client, test_user):
     response = client.post(
         "/auth/login",
         data={
-            "username": "testuser",
+            "username": TEST_USERNAME,
             "password": "wrongpassword"
         }
     )
@@ -53,8 +57,8 @@ def test_login_nonexistent_user(client):
     response = client.post(
         "/auth/login",
         data={
-            "username": "nonexistent",
-            "password": "password"
+            "username": "exampleuser",
+            "password": TEST_PASSWORD
         }
     )
     
@@ -64,7 +68,7 @@ def test_login_missing_fields(client):
     """Test login with missing required fields."""
     response = client.post(
         "/auth/login",
-        data={"username": "testuser"}
+        data={"username": TEST_USERNAME}
         # Missing password
     )
     

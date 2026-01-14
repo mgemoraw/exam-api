@@ -12,11 +12,11 @@ from app.core.deps import get_user
 
 
 
-router = APIRouter(
+exam_router = APIRouter(
 	prefix="/exams",
 	)
 
 
-@router.get("/")
+@exam_router.get("/")
 async def greetings(user: User = Depends(get_user)):
 	return {"message": "Hello Examination"}
