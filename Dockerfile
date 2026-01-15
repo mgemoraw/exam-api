@@ -4,6 +4,10 @@ FROM python:3.12-slim
 # Set working directory
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy requirements if present
 COPY requirements.txt .
 
