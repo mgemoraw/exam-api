@@ -8,8 +8,8 @@ from app.models import Base
 
 # from route import router as exam_router
 
-from app.routes.user import  user_router, auth_router
-from app.routes.exam import exam_router
+from app.api.routes.user import  user_router, auth_router
+from app.api.routes.exam import exam_router
 from app.middlewares.auth_middleware import auth_middleware
 import logging
 
