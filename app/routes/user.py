@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+# from fastapi.
 from fastapi.exceptions import HTTPException
 from uuid import uuid4
 from sqlalchemy.orm import Session 
@@ -19,6 +20,7 @@ async def greetings():
 
 @router.post("/auth/login")
 async def login(user: UserLogin, db: Session = Depends(get_db)):
+	# user = UserLogin(username, password)
 	db_user = db.query(User).filter(User.username==user.username).first()
 	if db_user is None:
 		raise HTTPException(
