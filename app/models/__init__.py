@@ -7,3 +7,16 @@ from .exam import (
 	AttemptQuestion, 
 	Answer,
 	)
+
+from .base import Base
+
+
+__all__ = [
+    "User",
+    "Exam",
+    "Question",
+	"Option",
+    "ExamAttempt",
+	"AttemptQuestion",
+	"Answer",
+]

@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator
+import os 
 
-
-DATABASE_URL = 'sqlite:///./test.db'
+# user environment variables in production
+DATABASE_URL  = os.getenv('SQLITE_DB_URL', 'sqlite:///./test.db')
 
 engine= create_engine(
     DATABASE_URL,
@@ -11,6 +12,7 @@ engine= create_engine(
     pool_size=20,
     max_overflow=30,
     echo=True,
+    connect_args={"check_same_thread": False}  # Only for SQLite
 )
 
 SessionLocal = sessionmaker(

@@ -5,7 +5,7 @@ from uuid import UUID
 
 from .database import get_db
 from .security import oauth2_scheme, SECRET_KEY, ALGORITHM
-from models.user import User
+from app.models.user import User
 
 
 def get_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:

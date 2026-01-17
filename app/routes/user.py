@@ -1,32 +1,40 @@
-from fastapi import APIRouter, Depends
-# from fastapi.
+from typing import Optional
+from fastapi import APIRouter, Depends, Form, Body
 from fastapi.exceptions import HTTPException
 from uuid import uuid4
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session 
 
-from models import User 
-from schemas.user import UserCreate, UserLogin
-from core.database import get_db, SessionLocal
-from core.security import create_access_token, hash_password
+from app.models.user import User 
+from app.schemas.user import UserCreate, UserLogin
+from app.responses.user import  UserResponse
+from app.core.database import get_db, SessionLocal
+from app.core.security import create_access_token, get_current_user, hash_password
 
-router = APIRouter(
+user_router = APIRouter(
 	prefix="/users",
 	)
 
+auth_router = APIRouter(
+	prefix="/auth",
+	)
 
-@router.get("/")
+
+@user_router.get("/")
 async def greetings():
 	return {"message": "Hello users"}
 
-@router.post("/auth/login")
-async def login(user: UserLogin, db: Session = Depends(get_db)):
-	# user = UserLogin(username, password)
+@auth_router.post("/login")
+async def login(user: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+	# check if user exists
 	db_user = db.query(User).filter(User.username==user.username).first()
 	if db_user is None:
 		raise HTTPException(
 			status_code=400,
 			detail="Invalid username or password"
 			)
+	
+	
 	user_password = user.password
 	if not hash_password(user_password) == db_user.hashed_password:
 		raise HTTPException(
@@ -39,7 +47,7 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
 	return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/create")
+@user_router.post("/create")
 async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 	new_user = User(
 		id=uuid4(), 
@@ -53,6 +61,8 @@ async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 
 	if db_user is not None:
 		raise HTTPException(
+			status_code=400,
+			detail="Username already exists"
 			)
 	
 	if new_user:
@@ -63,7 +73,24 @@ async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 
 	return new_user
 
-@router.post("/get/{user_id}")
+@user_router.get("/get/{user_id}")
 async def get_user(user_id:str, db:Session = Depends(get_db)):
 	user = db.query(User).filter(User.id==user_id).first()
 	return user
+
+@user_router.get("/get/users/", response_model=list[UserResponse])
+async def get_users(user: User = Depends(get_current_user), db:Session = Depends(get_db)):
+	users = db.query(User).limit(100).all()
+	return users
+
+
+@user_router.get("/get/me/", response_model=UserResponse)
+async def get_me(user: User = Depends(get_current_user), db:Session = Depends(get_db)):
+	return {
+		"id": user.id,
+		"username": user.username,
+		"email": user.email,
+		"is_active": user.is_active,
+		"is_superuser": user.is_superuser
+	}
+

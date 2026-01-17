@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: exam-api:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FASTAPI_ENV=production
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+      # test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+# Optional Postgres service (uncomment if you need a DB)
+#  db:
+#    image: postgres:14
+#    environment:
+#      POSTGRES_DB: examdb
+#      POSTGRES_USER: examuser
+#      POSTGRES_PASSWORD: exampass
+#    volumes:
+#      - db-data:/var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
+#    restart: unless-stopped
+
+volumes:
+  db-data:

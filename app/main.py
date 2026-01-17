@@ -3,23 +3,35 @@ from contextlib import asynccontextmanager
 
 # import models # critical import to start creating tables at startup
 
-from core.database import engine
-from models.base import Base
+from app.core.database import engine
+from app.models import Base
 
 # from route import router as exam_router
-from routes.user import router as user_router
-from routes.exam import router as exam_router
+
+from app.routes.user import  user_router, auth_router
+from app.routes.exam import exam_router
+from app.middlewares.auth_middleware import auth_middleware
+import logging
+
+logger = logging.getLogger(__file__)
 
 @asynccontextmanager
-def lifespan():
-    # create basemodel
+async def lifespan(app: FastAPI):
+    # Startup: Create tables
+    print("Starting up...")
     Base.metadata.create_all(bind=engine)
+    
+    yield  # App runs here
+    
+    # Shutdown: Clean up
+    print("Shutting down...")
+    engine.dispose()
 
-    yield 
 
 # creating app
 app = FastAPI(lifespan=lifespan)
 
+app.middleware("http")(auth_middleware)
 
 # @app.on_event("startup")
 # def startup():
@@ -31,6 +43,6 @@ async def root():
     return {"message": "Welcome to the Exam API"}
 
 
-app.include_router(exam_router)
+app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(exam_router)

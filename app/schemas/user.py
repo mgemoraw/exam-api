@@ -7,7 +7,7 @@ class UserCreate(BaseModel):
 	id: UUID
 	username: str
 	email: Optional[EmailStr]
-	is_superuser: bool
+	is_superuser: Optional[bool] = False
 	password: str
 
 
