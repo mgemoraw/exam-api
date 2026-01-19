@@ -19,7 +19,7 @@ logger = logging.getLogger(__file__)
 async def lifespan(app: FastAPI):
     # Startup: Create tables
     print("Starting up...")
-    Base.metadata.create_all(bind=engine)
+    # Base.metadata.create_all(bind=engine)
     
     yield  # App runs here
     

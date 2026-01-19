@@ -1,9 +1,16 @@
 # models/user.py
 from sqlalchemy import String, Boolean, Column
 from sqlalchemy.orm import Mapped, mapped_column
+from typing import List, Optional
+from sqlalchemy.orm import relationship
 from uuid import uuid4
 from sqlalchemy.dialects.postgresql import UUID
+
+from app.models.auth import RefreshToken
+
+# from app.models.auth import RefreshToken
 from .base import Base
+
 
 
 class User(Base):
@@ -22,6 +29,13 @@ class User(Base):
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
 
+    # Add relationship
+    refresh_tokens: Mapped[List["RefreshToken"]] = relationship(
+        "RefreshToken", 
+        back_populates="user",
+        cascade="all, delete-orphan", # Optional: deletes tokens when user is deleted
+    )
+    
 
 class UserProfile(Base):
     __tablename__ = "user_profiles"

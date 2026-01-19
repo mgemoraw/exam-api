@@ -1,22 +1,37 @@
-from fastapi import Depends, HTTPException, status
+import secrets
+from typing import Any, Dict, Optional
+from fastapi import  Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
+from redis.asyncio import Redis
 from app.core.database import get_db    
 from app.models.user import User
+from app.core.config import settings
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/auth/login")
+
+
 
 SECRET_KEY = "NKPD9W4hV/+YStZ+RejELM68Dw5okI5TrYrNWRcIf8q/OGfvxQXvtEirGA4yp9syAQkf3CWFqzH/nrV844dj8Q=="
 ALGORITHM = "HS256"
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/auth/login")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+# Initialize Redis for token storage
+redis_client: Optional[Redis] = None
+async def init_redis():
+    """Initialize Redis connection"""
+    global redis_client
+    if not redis_client:
+        redis_client = Redis.from_url(settings.REDIS_URL)
+
 
 def verify_token(token: str = Depends(oauth2_scheme)) -> str:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
             raise HTTPException(
@@ -33,19 +48,201 @@ def verify_token(token: str = Depends(oauth2_scheme)) -> str:
         )
     
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+def create_access_token(data: dict=Dict[str, Any], expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
 
+    # add token metadata
+    jti = secrets.token_urlsafe(16)
+    to_encode.update({
+        "exp": expire,
+        "iat": datetime.utcnow(),
+        "jti": jti,  # Uniqe ID for this access toke
+        "type": "access",
+        "scope": "user_ccess",
+    })
+    
+    # to_encode.update({"exp": expire})
+
+    jwt_token = jwt.encode(
+        to_encode, 
+        settings.SECRET_KEY, 
+        algorithm=settings.ALGORITHM
+        )
+    
+    return {
+        "token": jwt_token,
+        "expires_in": settings.security.ACCESS_TOKEN_EXPIRE_MINUTES*60,
+        "jti": jti,
+        "token_type": "bearer",
+    }
+
+
+async def create_refresh_token(user_id: str, db) -> Dict[str, Any]:
+    """
+    Create refresh token and store it in database
+    Implements refresh token rotation for security
+    """
+    # Generate unique token ID
+    jti = secrets.token_urlsafe(32)
+    
+    # Calculate expiration
+    expire = datetime.utcnow() + timedelta(
+        days=settings.security.REFRESH_TOKEN_EXPIRE_DAYS
+    )
+    
+    # Create token payload
+    payload = {
+        "sub": user_id,
+        "exp": expire,
+        "iat": datetime.utcnow(),
+        "type": "refresh",
+        "jti": jti,
+        "scope": "refresh"
+    }
+    
+    # Encode token
+    token = jwt.encode(
+        payload,
+        settings.security.SECRET_KEY,
+        algorithm=settings.security.ALGORITHM
+    )
+    
+    # Store refresh token in database (for invalidation)
+    from app.models import RefreshToken
+    db_refresh_token = RefreshToken(
+        jti=jti,
+        user_id=user_id,
+        token_hash=hash_token(token),
+        expires_at=expire,
+        is_revoked=False
+    )
+    db.add(db_refresh_token)
+    await db.commit()
+    
+    # Also store in Redis for fast validation
+    if redis_client:
+        await redis_client.setex(
+            f"refresh_token:{jti}",
+            settings.security.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+            user_id
+        )
+    
+    return {
+        "token": token,
+        "expires_in": settings.security.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+        "jti": jti
+    }
+
+def hash_token(token: str) -> str:
+    """Hash token for secure storage"""
+    import hashlib
+    return hashlib.sha256(token.encode()).hexdigest()
+
+async def verify_token(token: str, expected_type: str = "access") -> dict:
+    """
+    Verify JWT token and check its type
+    
+    Args:
+        token: JWT token to verify
+        expected_type: "access" or "refresh"
+    
+    Returns:
+        Decoded token payload if valid
+    
+    Raises:
+        HTTPException if token is invalid or wrong type
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    type_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail=f"Invalid token type. Expected {expected_type} token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        # Decode token
+        payload = jwt.decode(
+            token,
+            settings.security.SECRET_KEY,
+            algorithms=[settings.security.ALGORITHM]
+        )
+        
+        # Check token type
+        if payload.get("type") != expected_type:
+            raise type_exception
+        
+        # Additional validation for refresh tokens
+        if expected_type == "refresh":
+            jti = payload.get("jti")
+            if not jti:
+                raise credentials_exception
+            
+            # Check if refresh token is revoked
+            if redis_client:
+                # Check in Redis first
+                stored_user = await redis_client.get(f"refresh_token:{jti}")
+                if not stored_user:
+                    raise credentials_exception
+            else:
+                # Fallback to database check
+                from app.core.database import get_db
+                from app.models import RefreshToken
+                db = next(get_db())
+                db_token = db.query(RefreshToken).filter(
+                    RefreshToken.jti == jti,
+                    RefreshToken.is_revoked == False
+                ).first()
+                if not db_token:
+                    raise credentials_exception
+        
+        return payload
+        
+    except JWTError:
+        raise credentials_exception
+
+
+async def revoke_refresh_token(jti: str, db):
+    """Revoke a refresh token (logout or security measure)"""
+    if redis_client:
+        await redis_client.delete(f"refresh_token:{jti}")
+    
+    # Mark as revoked in database
+    from app.models import RefreshToken
+    db_token = db.query(RefreshToken).filter(RefreshToken.jti == jti).first()
+    if db_token:
+        db_token.is_revoked = True
+        await db.commit()
+
+def is_password_strong(password:str):
+    SYMBOLS = ["!", "@", "#", "$", "%", "&", "*", "(", ")", "-", "_", "+", "=", "[", "]", "{", "}", "|", "\\", ";", ":", "'", '"', ",", "<", ".", ">", "/", "?"]
+    
+    if len(password) < 8:
+        return False
+    if not any(char.isupper() for char in password):
+        return False
+    if not any(char.islower() for char in password):
+        return False
+    if not any(char.isdigit() for char in password):
+        return False
+    if not any(char in SYMBOLS for char in password):
+        return False
+    
+    return True
+    
+    
 def hash_password(password: str) -> str:
     # Implement a proper password hashing mechanism here
     import hashlib
+
     return hashlib.sha256(password.encode()).hexdigest()
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

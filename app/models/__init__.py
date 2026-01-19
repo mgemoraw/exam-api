@@ -1,3 +1,4 @@
+from .base import Base
 from .user import User
 from .exam import (
 	Exam, 
@@ -7,8 +8,7 @@ from .exam import (
 	AttemptQuestion, 
 	Answer,
 	)
-
-from .base import Base
+from.auth import RefreshToken
 
 
 __all__ = [
@@ -19,4 +19,5 @@ __all__ = [
     "ExamAttempt",
 	"AttemptQuestion",
 	"Answer",
+    "RefreshToken"
 ]

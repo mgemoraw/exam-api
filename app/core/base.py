@@ -8,3 +8,12 @@ from app.models.exam import (
     ExamAttempt
 )
 
+__all__ = [
+    Base,
+    User,
+    Exam,
+    Question,
+    Answer,
+    AttemptQuestion,
+    ExamAttempt,
+]

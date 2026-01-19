@@ -106,3 +106,6 @@ class Settings(BaseSettings):
         case_sensitive=True,
         extra="ignore"  # Ignore extra fields in .env
     )
+
+
+settings = Settings()

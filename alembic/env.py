@@ -10,6 +10,9 @@ from alembic import context
 
 
 import logging
+import os
+import sys 
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -32,12 +35,17 @@ except Exception:
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
-# Import your Base and models
-from app.models import *
-from app.models import Base 
+# ============ CRITICAL CHANGE 1: Import settings FIRST ============
+from app.core.config import settings  # Your config file
 
+# ============ CRITICAL CHANGE 2: Override alembic.ini URL ============
+# Use your actual database URL from settings, not the hardcoded one
+# Remove or comment out any hardcoded DB_URL lines
 # DB_URL = os.getenv('SQLITE_DB_URL', 'sqlite:///./test.db')
-# config.set_main_option('sqlalchemy.url', DB_URL)
+config.set_main_option('sqlalchemy.url', settings.SQLITE_DATABASE_URL)
+
+# Import your Base and models
+from app.models import Base 
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -63,12 +71,17 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = config.get_main_option("sqlalchemy.url") or settings.database.SYNC_DATABASE_URL
+
+    # ============ CRITICAL CHANGE 4: SQLite batch mode ============
+    render_as_batch = 'sqlite' in url.lower() if url else False
+
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_as_batch=render_as_batch,  # ✅ Enables batch mode for SQLite
     )
 
     with context.begin_transaction():
@@ -82,6 +95,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    # ============ CRITICAL CHANGE 5: Handle SQLite batch mode ============
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
@@ -89,8 +103,15 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        # Check if using SQLite
+        is_sqlite = connection.engine.dialect.name == 'sqlite'
+        
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, 
+            target_metadata=target_metadata,
+            render_as_batch=is_sqlite,  # ✅ Enables batch mode for SQLite
+            compare_type=True,           # ✅ Better type comparison
+            compare_server_default=True  # ✅ Compare default values
         )
 
         with context.begin_transaction():
@@ -101,3 +122,5 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
+
+
