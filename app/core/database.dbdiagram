@@ -1,0 +1,309 @@
+{
+  "version": "1.0.0",
+  "darkMode": true,
+  "gridEnabling": false,
+  "detailLevel": "All",
+  "tablePositions": [
+    {
+      "name": "roles",
+      "schemaName": "public",
+      "x": 349.74261300724856,
+      "y": -604.6967190434411
+    },
+    {
+      "name": "users",
+      "schemaName": "public",
+      "x": -70.97352608984404,
+      "y": -902.3944714901669
+    },
+    {
+      "name": "user_roles",
+      "schemaName": "public",
+      "x": -238.13423937915945,
+      "y": 1089.5363465862383
+    },
+    {
+      "name": "permissions",
+      "schemaName": "public",
+      "x": -238.13423937915945,
+      "y": 1331.5363465862383
+    },
+    {
+      "name": "role_permissions",
+      "schemaName": "public",
+      "x": -7.792442504159453,
+      "y": 1331.5363465862383
+    },
+    {
+      "name": "refresh_tokens",
+      "schemaName": "public",
+      "x": 329.74798410099856,
+      "y": -897.2041299413414
+    },
+    {
+      "name": "exams",
+      "schemaName": "public",
+      "x": -238.13423937915945,
+      "y": -236.30174833536506
+    },
+    {
+      "name": "questions",
+      "schemaName": "public",
+      "x": 232.45256495115052,
+      "y": -412.5617256079843
+    },
+    {
+      "name": "choices",
+      "schemaName": "public",
+      "x": 507.8110191601221,
+      "y": -296.04824156271985
+    },
+    {
+      "name": "exam_attempts",
+      "schemaName": "public",
+      "x": -152.6219139827523,
+      "y": 783.5363465862383
+    },
+    {
+      "name": "attempt_questions",
+      "schemaName": "public",
+      "x": -152.6219139827523,
+      "y": 363.5363465862383
+    },
+    {
+      "name": "user_answers",
+      "schemaName": "public",
+      "x": -152.6219139827523,
+      "y": 573.5363465862383
+    }
+  ],
+  "tableGroupCollapseStates": [],
+  "stickyNoteLayouts": [],
+  "referencePaths": [
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "users",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "user_id"
+      ],
+      "secondTableName": "user_roles",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "roles",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "role_id"
+      ],
+      "secondTableName": "user_roles",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "users",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "assigned_by"
+      ],
+      "secondTableName": "user_roles",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "roles",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "role_id"
+      ],
+      "secondTableName": "role_permissions",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "permissions",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "permission_id"
+      ],
+      "secondTableName": "role_permissions",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "users",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "user_id"
+      ],
+      "secondTableName": "refresh_tokens",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "exams",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "exam_id"
+      ],
+      "secondTableName": "questions",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "questions",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "question_id"
+      ],
+      "secondTableName": "choices",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "users",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "user_id"
+      ],
+      "secondTableName": "exam_attempts",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "exams",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "exam_id"
+      ],
+      "secondTableName": "exam_attempts",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "exam_attempts",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "attempt_id"
+      ],
+      "secondTableName": "attempt_questions",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "questions",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "question_id"
+      ],
+      "secondTableName": "attempt_questions",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "exam_attempts",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "attempt_id"
+      ],
+      "secondTableName": "user_answers",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "questions",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "question_id"
+      ],
+      "secondTableName": "user_answers",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "choices",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "selected_option_id"
+      ],
+      "secondTableName": "user_answers",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    }
+  ]
+}

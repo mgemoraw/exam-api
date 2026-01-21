@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 services:
   app:
@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: exam-api:latest
+    container_name: exam_api
     ports:
       - "8000:8000"
     environment:
@@ -27,13 +28,13 @@ services:
 #    image: postgres:14
 #    environment:
 #      POSTGRES_DB: examdb
-#      POSTGRES_USER: examuser
-#      POSTGRES_PASSWORD: exampass
+#      POSTGRES_USER: sgetme
+#      POSTGRES_PASSWORD: 'root#sgetme'
 #    volumes:
-#      - db-data:/var/lib/postgresql/data
+#      - db_data:/var/lib/postgresql/data
 #    ports:
 #      - "5432:5432"
 #    restart: unless-stopped
 
 volumes:
-  db-data:
+  db_data:

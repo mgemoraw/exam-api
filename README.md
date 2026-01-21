@@ -31,3 +31,8 @@ alembic downgrade -1
 
 # 5. Production deployment
 alembic upgrade head  # Run this in deployment script
+
+
+# Docker Container initializing and running
+## 1. Create Dockerfile 
+docker 

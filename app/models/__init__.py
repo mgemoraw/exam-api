@@ -6,7 +6,7 @@ from .exam import (
 	Option,
 	ExamAttempt, 
 	AttemptQuestion, 
-	Answer,
+	UserAnswer,
 	)
 from.auth import RefreshToken
 

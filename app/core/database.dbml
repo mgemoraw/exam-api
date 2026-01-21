@@ -1,0 +1,96 @@
+// database.dbml
+Table roles {
+  id UUID [primary key]
+  name varchar [unique, not null] // e.g., 'admin', 'instructor', 'student'
+  description text
+}
+
+Table users {
+  id UUID [primary key]
+  username varchar
+  email varchar [unique]
+  hashed_password varchar
+  is_active boolean
+  //role_id UUID [ref: > roles.id]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table user_roles {
+  id UUID [primary key]
+  user_id UUID [ref: > users.id]
+  role_id UUID [ref: > roles.id]
+  assigned_by UUID [ref: > users.id, note: 'Admin who assigned the role']
+  assigned_at timestamp
+}
+
+Table permissions {
+  id UUID [primary key]
+  name varchar [unique, not null] // e.g., 'can_create_exam', 'can_assign_roles'
+  description text
+}
+
+Table role_permissions {
+  id UUID [primary key]
+  role_id UUID [ref: > roles.id]
+  permission_id UUID [ref: > permissions.id]
+}
+
+Table refresh_tokens {
+  id UUID [primary key]
+  jti varchar [unique]
+  user_id UUID [ref: > users.id]
+  expires_at timestamp
+  is_revoked boolean
+  created_at timestamp
+  revoked_at timestamp
+}
+
+Table exams {
+  id UUID [primary key]
+  duration_minutes int 
+  maximum_marks int
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table questions {
+  id UUID [primary key]
+  exam_id UUId [ref: > exams.id]
+  marks float 
+  text varchar
+}
+
+Table choices {
+  id UUID [primary key]
+  question_id UUID [ref: > questions.id]
+  text varchar
+  is_answer boolean
+}
+
+
+Table exam_attempts {
+  id UUID [primary key]
+  user_id UUID [ref: > users.id]
+  exam_id UUID [ref: > exams.id]
+  started_at timestamp
+  expires_at timestamp
+  score Integer
+  completed_at timestamp
+}
+
+Table attempt_questions {
+  id UUID [primary key]
+  attempt_id UUID [ref: > exam_attempts.id]
+  question_id UUID [ref: > questions.id]
+  order_index int 
+}
+
+Table user_answers {
+  id UUID [primary key]
+  attempt_id UUID [ref: > exam_attempts.id]
+  question_id UUID [ref: > questions.id]
+  selected_option_id UUID [ref: > choices.id]
+  created_at timestamp
+  updated_at timestamp
+}
