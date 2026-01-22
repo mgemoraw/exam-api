@@ -1,8 +1,8 @@
-"""re-defining relationships
+"""updates on RBA tables
 
-Revision ID: ba972327df29
+Revision ID: ee0269363e2d
 Revises: 
-Create Date: 2026-01-21 16:11:09.699905
+Create Date: 2026-01-22 11:32:34.034385
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ba972327df29'
+revision: str = 'ee0269363e2d'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -28,29 +28,27 @@ def upgrade() -> None:
     sa.Column('duration_minutes', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('exam', schema=None) as batch_op:
         batch_op.create_index(batch_op.f('ix_exam_id'), ['id'], unique=False)
 
-    op.create_table('user_profiles',
+    op.create_table('permissions',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('user_id', sa.UUID(), nullable=False),
-    sa.Column('full_name', sa.String(length=100), nullable=True),
-    sa.Column('bio', sa.String(length=255), nullable=True),
-    sa.Column('avatar_url', sa.String(length=255), nullable=True),
-    sa.Column('location', sa.String(length=100), nullable=True),
-    sa.Column('website', sa.String(length=255), nullable=True),
-    sa.Column('birth_date', sa.String(length=10), nullable=True),
-    sa.Column('phone_number', sa.String(length=15), nullable=True),
-    sa.Column('address', sa.String(length=255), nullable=True),
-    sa.Column('social_links', sa.String(length=255), nullable=True),
-    sa.Column('preferences', sa.String(length=255), nullable=True),
-    sa.Column('settings', sa.String(length=255), nullable=True),
-    sa.Column('created_at', sa.String(length=30), nullable=False),
-    sa.Column('updated_at', sa.String(length=30), nullable=False),
+    sa.Column('name', sa.Enum('CREATE_EXAM', 'ASSIGN_ROLE', 'VIEW_RESULT', 'GENERATE_REPORT', 'CREATE_ANNOUNCEMENT', name='permission_name_enum', native_enum=False), nullable=False),
+    sa.Column('description', sa.String(length=255), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('id')
+    sa.UniqueConstraint('id'),
+    sa.UniqueConstraint('name')
+    )
+    op.create_table('roles',
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('name', sa.Enum('ADMIN', 'QA_DIRECTOR', 'DEAN', 'APO', 'QA_OFFICER', 'CHAIR_HOLDER', 'COURSE_CHAIR', 'EDITOR', 'STUDENT', name='role_name_enum', native_enum=False), nullable=False),
+    sa.Column('description', sa.String(length=255), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('users',
     sa.Column('id', sa.UUID(), nullable=False),
@@ -105,6 +103,49 @@ def upgrade() -> None:
     with op.batch_alter_table('refresh_tokens', schema=None) as batch_op:
         batch_op.create_index(batch_op.f('ix_refresh_tokens_jti'), ['jti'], unique=True)
 
+    op.create_table('role_permissions',
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('role_id', sa.UUID(), nullable=False),
+    sa.Column('permission_id', sa.UUID(), nullable=False),
+    sa.ForeignKeyConstraint(['permission_id'], ['permissions.id'], ),
+    sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('id'),
+    sa.UniqueConstraint('role_id', 'permission_id', name='uq_role_permission')
+    )
+    op.create_table('user_profiles',
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('user_id', sa.UUID(), nullable=False),
+    sa.Column('full_name', sa.String(length=100), nullable=True),
+    sa.Column('bio', sa.String(length=255), nullable=True),
+    sa.Column('avatar_url', sa.String(length=255), nullable=True),
+    sa.Column('location', sa.String(length=100), nullable=True),
+    sa.Column('website', sa.String(length=255), nullable=True),
+    sa.Column('birth_date', sa.String(length=10), nullable=True),
+    sa.Column('phone_number', sa.String(length=15), nullable=True),
+    sa.Column('address', sa.String(length=255), nullable=True),
+    sa.Column('social_links', sa.String(length=255), nullable=True),
+    sa.Column('preferences', sa.String(length=255), nullable=True),
+    sa.Column('settings', sa.String(length=255), nullable=True),
+    sa.Column('created_at', sa.String(length=30), nullable=False),
+    sa.Column('updated_at', sa.String(length=30), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('id')
+    )
+    op.create_table('user_roles',
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('user_id', sa.UUID(), nullable=False),
+    sa.Column('role_id', sa.UUID(), nullable=False),
+    sa.Column('assigned_by', sa.UUID(), nullable=False),
+    sa.Column('assigned_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['assigned_by'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('id'),
+    sa.UniqueConstraint('user_id', 'role_id', name='uq_user_role')
+    )
     op.create_table('attempt_question',
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('attempt_id', sa.String(), nullable=False),
@@ -159,6 +200,9 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f('ix_attempt_question_id'))
 
     op.drop_table('attempt_question')
+    op.drop_table('user_roles')
+    op.drop_table('user_profiles')
+    op.drop_table('role_permissions')
     with op.batch_alter_table('refresh_tokens', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_refresh_tokens_jti'))
 
@@ -172,7 +216,8 @@ def downgrade() -> None:
 
     op.drop_table('exam_attempt')
     op.drop_table('users')
-    op.drop_table('user_profiles')
+    op.drop_table('roles')
+    op.drop_table('permissions')
     with op.batch_alter_table('exam', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_exam_id'))
 

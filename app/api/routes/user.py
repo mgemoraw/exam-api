@@ -4,6 +4,7 @@ from fastapi.exceptions import HTTPException
 from uuid import uuid4
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session 
+from sqlalchemy.exc import IntegrityError
 
 from app.models.user import User 
 from app.schemas.user import UserCreate, UserLogin
@@ -43,14 +44,15 @@ async def login(user: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
     """
 	# check if user exists
 	db_user = db.query(User).filter(User.username==user.username).first()
-	if db_user is None:
+	if db_user:
 		raise HTTPException(
 			status_code=400,
 			detail="Invalid username or password"
 			)
 	
 	# verify password
-	if not hash_password(user.password) == db_user.hashed_password:
+	if not verify_password(user.password, db_user.hashed_password):
+	# if not hash_password(user.password) == db_user.hashed_password:
 		raise HTTPException(
 			status_code=400,
 			detail="Invalid username or password"
@@ -83,9 +85,9 @@ async def login(user: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 @user_router.post("/create")
 async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 	# check if existing user in database
-	db_user = db.query(User).filter(User.username==user.username, User.email==user.email).first()
+	existing = db.query(User).filter((User.username==user.username) | (User.email==user.email)).first()
 
-	if db_user is not None:
+	if existing :
 		raise HTTPException(
 			status_code=400,
 			detail="Username or email already exists"
@@ -98,26 +100,49 @@ async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 			detail="Password is not strong enough"
 			)
 	
-	new_user = User(
-		id=uuid4(), 
-		username=user.username, 
-		email=user.email,
-		is_superuser=user.is_superuser,
-		hashed_password=hash_password(user.password)
-		)
+	try:
+		new_user = User(
+			username=user.username, 
+			email=user.email,
+			is_superuser=user.is_superuser,
+			hashed_password=hash_password(user.password)
+			)
 
-	if new_user:
-		db.add(new_user)
-		db.commit()
-		db.refresh(new_user)
+		if new_user:
+			db.add(new_user)
+			db.commit()
+			db.refresh(new_user)
+
+		return new_user
+	
+	except IntegrityError as e:
+		db.rollback()
+		raise HTTPException(status_code=400, detail="Username or email already exists")
+
+	except Exception as e:
+		db.rollback()
+		raise HTTPException(status_code=500, detail="Internal server error")
 
 
-	return new_user
-
-@user_router.get("/{user_id}")
-async def get_user(user_id:str, db:Session = Depends(get_db)):
-	user = db.query(User).filter(User.id==user_id).first()
+@user_router.get("/{username}")
+async def get_user_by_username(username:str, db:Session = Depends(get_db)):
+	user = db.query(User).filter(User.username==username).first()
 	return user
+
+@user_router.get("/{email}")
+async def get_user_by_email(email:str, db:Session = Depends(get_db)):
+	user = db.query(User).filter(User.email==email).first()
+	return user
+
+@user_router.delete("/{username}")
+async def delete_user(username:str, db:Session = Depends(get_db)):
+	user = db.query(User).filter(User.username==username).first()
+	db.delete(user)
+	db.commit()
+
+	return user
+
+
 
 @user_router.get("/", response_model=list[UserResponse])
 async def get_users(user: UserLogin = Depends(get_user), db:Session = Depends(get_db)):
@@ -126,12 +151,9 @@ async def get_users(user: UserLogin = Depends(get_user), db:Session = Depends(ge
 
 
 @user_router.get("/me", response_model=UserResponse)
-async def get_me(user: UserLogin = Depends(get_current_user), db:Session = Depends(get_db)):
-	return {
-		"id": user.id,
-		"username": user.username,
-		"email": user.email,
-		"is_active": user.is_active,
-		"is_superuser": user.is_superuser
-	}
+async def get_me(data: UserLogin = Depends(get_current_user), db:Session = Depends(get_db)):
+	user = db.query(User).filter(User.username==data.username, User.email==data.email).first()
+
+	return user
+
 

@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 from fastapi import  Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
+from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from redis.asyncio import Redis
@@ -12,12 +13,12 @@ from app.core.config import settings
 
 
 
-
-
 SECRET_KEY = "NKPD9W4hV/+YStZ+RejELM68Dw5okI5TrYrNWRcIf8q/OGfvxQXvtEirGA4yp9syAQkf3CWFqzH/nrV844dj8Q=="
 ALGORITHM = "HS256"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+pwd_context = CryptContext(schemes=['argon2', "bcrypt", "pbkdf2_sha256"], deprecated='auto')
+
 
 # Initialize Redis for token storage
 redis_client: Optional[Redis] = None
@@ -240,12 +241,14 @@ def is_password_strong(password:str):
     
 def hash_password(password: str) -> str:
     # Implement a proper password hashing mechanism here
-    import hashlib
+    # import hashlib
 
-    return hashlib.sha256(password.encode()).hexdigest()
+    # return hashlib.sha256(password.encode()).hexdigest()
+    return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return hash_password(plain_password) == hashed_password
+    # return hash_password(plain_password) == hashed_password
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_current_user(user_id: str = Depends(verify_token), db: Session = Depends(get_db)):

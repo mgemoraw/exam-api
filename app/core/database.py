@@ -4,7 +4,7 @@ from typing import Generator
 import os 
 
 # user environment variables in production
-DATABASE_URL  = os.getenv('SQLITE_DB_URL', 'sqlite:///./test.db')
+DATABASE_URL  = os.getenv('SQLITE_DB_URL', 'sqlite:///./data.db')
 
 engine= create_engine(
     DATABASE_URL,
