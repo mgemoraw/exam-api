@@ -75,7 +75,7 @@ def create_access_token(data: dict=Dict[str, Any], expires_delta: timedelta | No
     
     return {
         "token": jwt_token,
-        "expires_in": settings.security.ACCESS_TOKEN_EXPIRE_MINUTES*60,
+        "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES*60,
         "jti": jti,
         "token_type": "bearer",
     }
@@ -91,7 +91,7 @@ async def create_refresh_token(user_id: str, db) -> Dict[str, Any]:
     
     # Calculate expiration
     expire = datetime.utcnow() + timedelta(
-        days=settings.security.REFRESH_TOKEN_EXPIRE_DAYS
+        days=settings.REFRESH_TOKEN_EXPIRE_DAYS
     )
     
     # Create token payload
@@ -107,33 +107,34 @@ async def create_refresh_token(user_id: str, db) -> Dict[str, Any]:
     # Encode token
     token = jwt.encode(
         payload,
-        settings.security.SECRET_KEY,
-        algorithm=settings.security.ALGORITHM
+        settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM
     )
     
     # Store refresh token in database (for invalidation)
     from app.models import RefreshToken
+    import uuid
     db_refresh_token = RefreshToken(
         jti=jti,
-        user_id=user_id,
+        user_id=uuid.UUID(user_id),
         token_hash=hash_token(token),
         expires_at=expire,
         is_revoked=False
     )
     db.add(db_refresh_token)
-    await db.commit()
+    db.commit()
     
     # Also store in Redis for fast validation
     if redis_client:
         await redis_client.setex(
             f"refresh_token:{jti}",
-            settings.security.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+            settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
             user_id
         )
     
     return {
         "token": token,
-        "expires_in": settings.security.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+        "expires_in": settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
         "jti": jti
     }
 
@@ -172,8 +173,8 @@ async def verify_token(token: str, expected_type: str = "access") -> dict:
         # Decode token
         payload = jwt.decode(
             token,
-            settings.security.SECRET_KEY,
-            algorithms=[settings.security.ALGORITHM]
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
         )
         
         # Check token type
@@ -241,14 +242,14 @@ def is_password_strong(password:str):
     
 def hash_password(password: str) -> str:
     # Implement a proper password hashing mechanism here
-    # import hashlib
+    import hashlib
 
-    # return hashlib.sha256(password.encode()).hexdigest()
-    return pwd_context.hash(password)
+    return hashlib.sha256(password.encode()).hexdigest()
+    # return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    # return hash_password(plain_password) == hashed_password
-    return pwd_context.verify(plain_password, hashed_password)
+    return hash_password(plain_password) == hashed_password
+    # return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_current_user(user_id: str = Depends(verify_token), db: Session = Depends(get_db)):

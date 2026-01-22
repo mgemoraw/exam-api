@@ -19,9 +19,19 @@ class UserResponse(BaseModel):
 	is_active: bool
 
 	class Config:
-		orm_mode = True
+		from_attributes = True
 
 class UserLogin(BaseModel):
 	username: str
 	password: str
 	
+
+class TokenCreate(BaseModel):
+	access_token: str
+	refresh_token: str
+	token_type: str
+	expires_in: int
+	refresh_expires_in: int
+
+	class Config:
+		from_attributes = True

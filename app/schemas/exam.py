@@ -10,6 +10,10 @@ class ExamCreateRequest (BaseModel):
     id: UUID
     duration_minutes: int 
     maximum_marks: int 
+    
+    class Config:
+        from_attributes=True
+
 
 class ExamResponse (BaseModel):
     id: UUID
@@ -17,4 +21,7 @@ class ExamResponse (BaseModel):
     maximum_marks: int 
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        from_attributes=True
 

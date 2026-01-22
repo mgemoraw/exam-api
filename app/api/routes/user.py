@@ -25,51 +25,48 @@ from app.api.deps.user import get_user
 
 user_router = APIRouter(
 	prefix="/users",
-	tags=["authentication"]
+	tags=["Users"]
 	)
 
 auth_router = APIRouter(
 	prefix="/auth",
+	tags=['Authentication']
 	)
 
 
-@user_router.get("/")
-async def greetings():
-	return {"message": "Hello users"}
-
 @auth_router.post("/login")
-async def login(user: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
 	"""
     Authenticate user and return access & refresh tokens
     """
 	# check if user exists
-	db_user = db.query(User).filter(User.username==user.username).first()
-	if db_user:
+	user = db.query(User).filter(User.username==data.username).first()
+	if not user:
 		raise HTTPException(
 			status_code=400,
-			detail="Invalid username or password"
+			detail="User is not Registered"
 			)
 	
 	# verify password
-	if not verify_password(user.password, db_user.hashed_password):
-	# if not hash_password(user.password) == db_user.hashed_password:
+	# if not verify_password(user.password, db_user.hashed_password):
+	if not hash_password(data.password) == user.hashed_password:
 		raise HTTPException(
 			status_code=400,
 			detail="Invalid username or password"
 			)
 	
 	# check if user if active
-	if not db_user.is_active:
+	if not user.is_active:
 		raise HTTPException(
 			status_code=400,
 			detail="User is not active"
 			)
 	# create and return token here
-	access_token = create_access_token(data={"sub": str(db_user.id)})
+	access_token = create_access_token(data={"sub": str(user.id)})
 	
 	# refresh token
 	refresh_token = create_refresh_token(
-		user_id=str(db_user.id),
+		user_id=str(user.id),
 		db=db,
 		)
 	
@@ -81,6 +78,46 @@ async def login(user: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
         "refresh_expires_in": refresh_token["expires_in"]
 	}
 
+@auth_router.post("/token")
+async def access_token(data:UserLogin, db:Session=Depends(get_db)):
+	user = db.query(User).filter(User.username==data.username).first()
+	if not user:
+		raise HTTPException(
+			status_code=400,
+			detail="Invalid username or password"
+			)
+	
+	if not verify_password(data.password, user.hashed_password):
+		raise HTTPException(
+			status_code=400,
+			detail="Invalid username or password"
+		)
+
+	# check if user if active
+	if not user.is_active:
+		raise HTTPException(
+			status_code=400,
+			detail="User is not active. please activate your account throug email"
+			)
+	# create and return token here
+	access_token = create_access_token(data={"sub": str(user.id)})
+	
+	# refresh token
+	refresh_token = await create_refresh_token(
+		user_id=str(user.id),
+		db=db,
+		)
+	
+	return {
+		"access_token": access_token["token"],
+        "refresh_token": refresh_token["token"],
+        "token_type": "bearer",
+        "expires_in": access_token["expires_in"],
+        "refresh_expires_in": refresh_token["expires_in"]
+	}
+	return {
+		"access_token": access_token,
+	}
 
 @user_router.post("/create")
 async def create_user(user:UserCreate, db:Session = Depends(get_db)):
@@ -121,6 +158,21 @@ async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 
 	except Exception as e:
 		db.rollback()
+		raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@user_router.get("/")
+async def get_all_users(db:Session = Depends(get_db)):
+	try:
+		users = db.query(User).all()
+		return users
+	except IntegrityError as e:
+		db.rollback()
+		raise HTTPException(status_code=400, detail="Username or email already exists")
+
+	except Exception as e:
+		db.rollback()
+		print(e)
 		raise HTTPException(status_code=500, detail="Internal server error")
 
 
