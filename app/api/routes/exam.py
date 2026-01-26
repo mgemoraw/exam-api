@@ -23,7 +23,7 @@ async def greetings(user: User = Depends(get_user)):
 	return {"message": "Hello Examination"}
 
 @exam_router.post("/", response_model=ExamResponse)
-async def create_exam(data: ExamCreateRequest, db:Session=Depends(get_db)):
+async def create_exam(data: ExamCreateRequest, db:Session=Depends(get_db), user:User=Depends(get_user)):
 	exam = Exam(
 		id = uuid4(),
 		duration_minutes=data.duration_minutes,

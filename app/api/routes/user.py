@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.models.user import User 
 from app.schemas.user import UserCreate, UserLogin
-from app.responses.user import  UserResponse
+from app.responses.user import  UserResponse, UserTokenResponse
 from app.core.database import get_db, SessionLocal
 from app.core.config import settings
 from app.core.security import (
@@ -65,7 +65,7 @@ async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 	access_token = create_access_token(data={"sub": str(user.id)})
 	
 	# refresh token
-	refresh_token = create_refresh_token(
+	refresh_token = await create_refresh_token(
 		user_id=str(user.id),
 		db=db,
 		)
@@ -78,7 +78,7 @@ async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
         "refresh_expires_in": refresh_token["expires_in"]
 	}
 
-@auth_router.post("/token")
+@auth_router.post("/token", response_model=UserTokenResponse)
 async def access_token(data:UserLogin, db:Session=Depends(get_db)):
 	user = db.query(User).filter(User.username==data.username).first()
 	if not user:
@@ -160,6 +160,26 @@ async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 		db.rollback()
 		raise HTTPException(status_code=500, detail="Internal server error")
 
+@auth_router.post("/activate")
+async def activate_user_account(data: UserLogin, db:Session = Depends(get_db)):
+	user = db.query(User).filter(User.username==data.username).first()
+	
+	if not user:
+		raise HTTPException(
+			status_code=400,
+			detail="User is not Registered"
+		)
+	if user.is_active:
+		raise HTTPException(
+			status_code=400,
+			detail="User is already active"
+		)
+
+	user.is_active=True
+	db.commit()
+	db.refresh(user)
+	return user
+
 
 @user_router.get("/")
 async def get_all_users(db:Session = Depends(get_db)):
@@ -203,9 +223,19 @@ async def get_users(user: UserLogin = Depends(get_user), db:Session = Depends(ge
 
 
 @user_router.get("/me", response_model=UserResponse)
-async def get_me(data: UserLogin = Depends(get_current_user), db:Session = Depends(get_db)):
-	user = db.query(User).filter(User.username==data.username, User.email==data.email).first()
+async def get_me(user:User=Depends(get_user), db:Session=Depends(get_db)):
+	data = db.query(User).filter(User.username==user.username).first()
+	
 
-	return user
+	return {
+		"message": "User profile",
+		"data": data,
+	}
 
 
+
+@user_router.get("/user", response_model=UserResponse, )
+async def get_user_data(user:User=Depends(get_user), db:Session=Depends(get_db)):
+	if user is None:
+		raise HTTPException(status_code=401, detail="Unauthorized")
+	return user 

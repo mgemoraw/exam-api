@@ -8,7 +8,7 @@ from app.core.security import oauth2_scheme, SECRET_KEY, ALGORITHM
 from app.models.user import User
 
 
-def get_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+def get_user(tokens: dict = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -16,15 +16,27 @@ def get_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db))
     )
 
     try:
+        token = tokens.get("access_token")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str | None = payload.get("sub")
+
         if user_id is None:
+            # db.rollback()
             raise credentials_exception
+        
+        user = db.get(User, UUID(user_id))
+        # user = db.query(User).filter(User.id == UUID(user_id)).first()
+        if user is None:
+            db.rollback()
+            raise credentials_exception
+
+        return user
+
     except JWTError:
+        # db.rollback()
         raise credentials_exception
 
-    user = db.get(User, UUID(user_id))
-    if user is None:
+    except  Exception as e:
+        db.rollback()
         raise credentials_exception
-
-    return user
+    
