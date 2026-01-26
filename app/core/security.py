@@ -16,9 +16,20 @@ from app.core.config import settings
 SECRET_KEY = "NKPD9W4hV/+YStZ+RejELM68Dw5okI5TrYrNWRcIf8q/OGfvxQXvtEirGA4yp9syAQkf3CWFqzH/nrV844dj8Q=="
 ALGORITHM = "HS256"
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
-pwd_context = CryptContext(schemes=['argon2', "bcrypt", "pbkdf2_sha256"], deprecated='auto')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
 
+pwd_context = CryptContext(schemes=['argon2', "bcrypt", "pbkdf2_sha256"], deprecated='auto')
+myctx = CryptContext(schemes=["sha256_crypt", "md5_crypt"])
+
+
+credentials_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Token expired or invalid"
+)
+unauthorized_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="You are not Authorized"
+)
 
 # Initialize Redis for token storage
 redis_client: Optional[Redis] = None
@@ -29,6 +40,16 @@ async def init_redis():
         redis_client = Redis.from_url(settings.REDIS_URL)
 
 
+
+def authenticate_user(username: str, password: str, db:Session):
+    user = db.query(User).filter(User.username==username).first()
+    if not user:
+        return False
+    if not pwd_context.verify(password, user.hashed_password):
+        return False
+
+    return user
+ 
 def verify_token(token: str = Depends(oauth2_scheme)) -> str:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -50,6 +71,7 @@ def verify_token(token: str = Depends(oauth2_scheme)) -> str:
 
 def create_access_token(data: dict=Dict[str, Any], expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
+    
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
@@ -64,6 +86,16 @@ def create_access_token(data: dict=Dict[str, Any], expires_delta: timedelta | No
         "type": "access",
         "scope": "user_ccess",
     })
+
+    # Create token payload
+    # payload = {
+    #     "sub": data.get("sub"),
+    #     "exp": expire,
+    #     "iat": datetime.utcnow(),
+    #     "type": "access",
+    #     "jti": jti,
+    #     "scope": "user_access"
+    # }
     
     # to_encode.update({"exp": expire})
 

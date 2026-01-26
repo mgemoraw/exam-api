@@ -1,7 +1,8 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Form, Body
+from fastapi import APIRouter, Depends, Form, Body, Request
 from fastapi.exceptions import HTTPException
 from uuid import uuid4
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session 
 from sqlalchemy.exc import IntegrityError
@@ -16,11 +17,10 @@ from app.core.security import (
 	create_refresh_token,
     is_password_strong,
 	verify_token,
-	get_current_user,
 	hash_password,
 	verify_password,
 )
-from app.api.deps.user import get_user
+from app.api.deps.user import get_user, get_current_user
 
 
 user_router = APIRouter(
@@ -70,7 +70,7 @@ async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 		db=db,
 		)
 	
-	return {
+	content =  {
 		"access_token": access_token["token"],
         "refresh_token": refresh_token["token"],
         "token_type": "bearer",
@@ -78,8 +78,25 @@ async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
         "refresh_expires_in": refresh_token["expires_in"]
 	}
 
+	# create a json response object
+	response = JSONResponse(
+		content=content,
+		
+	)
+	response.set_cookie(
+		key="access_token", 
+		value=access_token["token"], 
+		httponly=True,
+		secure=True,
+		samesite="Lax",
+	)
+
+	
+	return response 
+
+
 @auth_router.post("/token", response_model=UserTokenResponse)
-async def access_token(data:UserLogin, db:Session=Depends(get_db)):
+async def access_token(data:OAuth2PasswordRequestForm=Depends(), db:Session=Depends(get_db)):
 	user = db.query(User).filter(User.username==data.username).first()
 	if not user:
 		raise HTTPException(
@@ -87,7 +104,8 @@ async def access_token(data:UserLogin, db:Session=Depends(get_db)):
 			detail="Invalid username or password"
 			)
 	
-	if not verify_password(data.password, user.hashed_password):
+	# if not verify_password(data.password, user.hashed_password):
+	if not hash_password(data.password) == user.hashed_password:
 		raise HTTPException(
 			status_code=400,
 			detail="Invalid username or password"
@@ -108,16 +126,40 @@ async def access_token(data:UserLogin, db:Session=Depends(get_db)):
 		db=db,
 		)
 	
-	return {
+	
+	content =  {
 		"access_token": access_token["token"],
         "refresh_token": refresh_token["token"],
         "token_type": "bearer",
         "expires_in": access_token["expires_in"],
         "refresh_expires_in": refresh_token["expires_in"]
 	}
-	return {
-		"access_token": access_token,
-	}
+
+	# create a json response object
+	response = JSONResponse(
+		content=content,
+		
+	)
+	response.set_cookie(
+		key="access_token", 
+		value=access_token["token"], 
+		httponly=True,
+		secure=True,
+		samesite="Lax",
+	)
+
+	return response
+
+
+@user_router.get("/me", response_model=UserResponse)
+async def get_user_detail(current_user: UserLogin = Depends(get_current_user), db:Session=Depends(get_db)):
+	
+	if current_user is None:
+		JSONResponse(
+            status_code=401,
+            content={"message": "You're not logged in"}
+        )
+	return current_user
 
 @user_router.post("/create")
 async def create_user(user:UserCreate, db:Session = Depends(get_db)):
@@ -181,8 +223,8 @@ async def activate_user_account(data: UserLogin, db:Session = Depends(get_db)):
 	return user
 
 
-@user_router.get("/")
-async def get_all_users(db:Session = Depends(get_db)):
+@user_router.get("/", response_model=list[UserResponse])
+async def get_all_users(user:User=Depends(get_current_user), db:Session = Depends(get_db)):
 	try:
 		users = db.query(User).all()
 		return users
@@ -215,27 +257,3 @@ async def delete_user(username:str, db:Session = Depends(get_db)):
 	return user
 
 
-
-@user_router.get("/", response_model=list[UserResponse])
-async def get_users(user: UserLogin = Depends(get_user), db:Session = Depends(get_db)):
-	users = db.query(User).limit(100).all()
-	return users
-
-
-@user_router.get("/me", response_model=UserResponse)
-async def get_me(user:User=Depends(get_user), db:Session=Depends(get_db)):
-	data = db.query(User).filter(User.username==user.username).first()
-	
-
-	return {
-		"message": "User profile",
-		"data": data,
-	}
-
-
-
-@user_router.get("/user", response_model=UserResponse, )
-async def get_user_data(user:User=Depends(get_user), db:Session=Depends(get_db)):
-	if user is None:
-		raise HTTPException(status_code=401, detail="Unauthorized")
-	return user 

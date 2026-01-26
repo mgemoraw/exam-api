@@ -12,22 +12,31 @@ class ExamTypeEnum(Enum):
     HOLISTIC_EXAM="holistic exam"
     ENTRANCE_EXAM="entrance exam"
 
-class ExamCreateRequest (BaseModel):
-    id: UUID
-    duration_minutes: int 
-    maximum_marks: int 
-    exam_type: Optional[Enum]=ExamTypeEnum.MODEL_EXIT_EXAM    
-    class Config:
-        from_attributes=True
+
+class ExamCreateRequest(BaseModel):
+    title: str
+    maximum_marks: int = 100
+    duration_minutes: int
+    exam_type: ExamTypeEnum = ExamTypeEnum.MODEL_EXIT_EXAM
+    description: Optional[str] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
 
 
-class ExamResponse (BaseModel):
-    id: UUID
-    duration_minutes: int 
-    maximum_marks: int 
+
+class ExamResponse(BaseModel):
+    id: str
+    title: str
+    maximum_marks: int
+    duration_minutes: int
+    exam_type: ExamTypeEnum
+    description: Optional[str]
+    is_visible: bool
+    start_time: Optional[datetime]
+    end_time: Optional[datetime]
     created_at: datetime
     updated_at: datetime
 
     class Config:
-        from_attributes=True
+        orm_mode = True
 

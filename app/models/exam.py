@@ -4,10 +4,21 @@ from typing import Optional, List
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Mapped
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, Float
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, Float, Text, Enum as SQLEnum
 
 from datetime import datetime
 from app.models.base import Base
+from enum import Enum
+class ExamTypeEnum(str, Enum):
+    MODEL_EXIT_EXAM = 'model exit exam'
+    HOLISTIC_EXAM = 'holistic exam'
+    ENTRANCE_EXAM = 'entrance exam'
+
+EXAM_TYPE_LABELS = {
+    ExamTypeEnum.MODEL_EXIT_EXAM: "MEE",
+    ExamTypeEnum.HOLISTIC_EXAM: "HE",
+    ExamTypeEnum.ENTRANCE_EXAM: "EE",
+}
 
 
 class Exam(Base):
@@ -16,21 +27,30 @@ class Exam(Base):
     title: str = Column(String, nullable=False)
     maximum_marks: int = Column(Integer, default=100, nullable=False)
     duration_minutes: int = Column(Integer, nullable=False)
-    description: Optional[str] = Column(String, nullable=True)
+    exam_type = Column(SQLEnum(ExamTypeEnum), default=ExamTypeEnum.MODEL_EXIT_EXAM, nullable=False)
 
+    description: Optional[str] = Column(String, nullable=True)
+    is_visible = Column(Boolean, default=False)
+    start_time = Column(DateTime, nullable=True) # when exam becomes visible
+    end_time = Column(DateTime, nullable=True)   # when exam closes
     created_at = Column(DateTime, default=datetime.utcnow())
     updated_at = Column(DateTime, default=datetime.utcnow())
 
+    # relationships
+    exam_question: Mapped[List['ExamQuestion']] = relationship('ExamQuestion', back_populates='exams')
 
 class Question(Base):
     __tablename__ = "questions"
     id: UUID = Column(String, primary_key=True, index=True)
     exam_id: UUID = Column(String, ForeignKey('exam.id'), nullable=False)
     text: str = Column(String, nullable=False)
+    marks = Column(Integer, default=1)
 
     # relationships
     choices:Mapped[List['Option']] = relationship('Option', back_populates='question')
 
+    # relationships
+    exam_question: Mapped[Optional['ExamQuestion']] = relationship('ExamQuestion', back_populates='questions')
 
 class Option(Base):
     __tablename__ = "choices"
@@ -41,7 +61,19 @@ class Option(Base):
 
     # relationships
     question = relationship('Question', back_populates='choices')
+    
 
+
+class ExamQuestion(Base):
+    __tablename__ = "exam_questions"
+    id: Mapped[UUID] = Column(String, primary_key=True, index=True)
+    exam_id = Column(String, ForeignKey("exam.id"), primary_key=True)
+    question_id = Column(String, ForeignKey("questions.id"), primary_key=True)
+
+
+    # relationships
+    questions: Mapped[List['Question']] = relationship('Question', back_populates='exam_question')
+    exams: Mapped[List['Question']] = relationship('Exam', back_populates='exam_question')
 
 class ExamAttempt(Base):
     __tablename__ = "exam_attempt"
