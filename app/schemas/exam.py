@@ -3,20 +3,17 @@ from pydantic import BaseModel
 from typing import Optional
 from uuid import uuid4, UUID
 from enum import Enum
+from app.models.exam import ExamTypeEnum
 
 class ExamRequest(BaseModel):
     pass 
-
-class ExamTypeEnum(Enum):
-    MODEL_EXIT_EXAM ="model exit exam"
-    HOLISTIC_EXAM="holistic exam"
-    ENTRANCE_EXAM="entrance exam"
 
 
 class ExamCreateRequest(BaseModel):
     title: str
     maximum_marks: int = 100
     duration_minutes: int
+    is_visible: bool = False
     exam_type: ExamTypeEnum = ExamTypeEnum.MODEL_EXIT_EXAM
     description: Optional[str] = None
     start_time: Optional[datetime] = None

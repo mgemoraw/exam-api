@@ -30,16 +30,32 @@ async def greetings(user: User = Depends(get_current_user), db:Session=Depends(g
 
 @exam_router.post("/", response_model=ExamResponse)
 async def create_exam(data: ExamCreateRequest, db:Session=Depends(get_db), user:User=Depends(get_current_user)):
-	exam = Exam(
-		id = str(uuid4()),
+     
+    exam = Exam(
+        id = str(uuid4()),
         title = data.title,
-		duration_minutes=data.duration_minutes,
-		maximum_marks=data.maximum_marks,
-		created_at = datetime.utcnow(),
-		updated_at = datetime.utcnow(),
-		# questions=data.questions
-	)
-	return exam 
+        duration_minutes=data.duration_minutes,
+        exam_type=data.exam_type,
+        description=data.description,
+        maximum_marks=data.maximum_marks,
+        is_visible=False,
+        created_at = datetime.utcnow(),
+        updated_at = datetime.utcnow(),
+        # questions=data.questions
+    )
+        
+    try:
+        db.add(exam)
+        db.commit()
+        db.refresh(exam)
+
+        return exam 
+    except Exception as e:
+        db.rollback()
+        raise e
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 
 @exam_router.post("/{exam_id}/questions")
 async def add_questions_to_exam(exam_id: str, question_ids: List[str], db: Session = Depends(get_db)):
@@ -69,6 +85,8 @@ async def schedule_exam(exam_id: str, start_time: datetime, end_time: datetime, 
     exam.end_time = end_time
     db.commit()
     return {"message": "Exam scheduled successfully"}
+
+    
 @exam_router.get("/available", response_model=List[ExamResponse])
 async def get_available_exams(db: Session = Depends(get_db)):
     now = datetime.utcnow()

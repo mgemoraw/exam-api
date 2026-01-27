@@ -9,6 +9,8 @@ from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, F
 from datetime import datetime
 from app.models.base import Base
 from enum import Enum
+
+
 class ExamTypeEnum(str, Enum):
     MODEL_EXIT_EXAM = 'model exit exam'
     HOLISTIC_EXAM = 'holistic exam'
@@ -27,7 +29,7 @@ class Exam(Base):
     title: str = Column(String, nullable=False)
     maximum_marks: int = Column(Integer, default=100, nullable=False)
     duration_minutes: int = Column(Integer, nullable=False)
-    exam_type = Column(SQLEnum(ExamTypeEnum), default=ExamTypeEnum.MODEL_EXIT_EXAM, nullable=False)
+    exam_type = Column(SQLEnum(ExamTypeEnum), server_default=ExamTypeEnum.MODEL_EXIT_EXAM.value, nullable=False)
 
     description: Optional[str] = Column(String, nullable=True)
     is_visible = Column(Boolean, default=False)
