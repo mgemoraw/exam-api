@@ -1,12 +1,13 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, Form, Body, Request
 from fastapi.exceptions import HTTPException
-from uuid import uuid4
+from uuid import UUID, uuid4
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session 
 from sqlalchemy.exc import IntegrityError
 
+from app.models.auth import RefreshToken
 from app.models.user import User 
 from app.schemas.user import UserCreate, UserLogin
 from app.responses.user import  UserResponse, UserTokenResponse
@@ -28,127 +29,6 @@ user_router = APIRouter(
 	tags=["Users"]
 	)
 
-auth_router = APIRouter(
-	prefix="/auth",
-	tags=['Authentication']
-	)
-
-
-@auth_router.post("/login")
-async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-	"""
-    Authenticate user and return access & refresh tokens
-    """
-	# check if user exists
-	user = db.query(User).filter(User.username==data.username).first()
-	if not user:
-		raise HTTPException(
-			status_code=400,
-			detail="User is not Registered"
-			)
-	
-	# verify password
-	# if not verify_password(user.password, db_user.hashed_password):
-	if not hash_password(data.password) == user.hashed_password:
-		raise HTTPException(
-			status_code=400,
-			detail="Invalid username or password"
-			)
-	
-	# check if user if active
-	if not user.is_active:
-		raise HTTPException(
-			status_code=400,
-			detail="User is not active"
-			)
-	# create and return token here
-	access_token = create_access_token(data={"sub": str(user.id)})
-	
-	# refresh token
-	refresh_token = await create_refresh_token(
-		user_id=str(user.id),
-		db=db,
-		)
-	
-	content =  {
-		"access_token": access_token["token"],
-        "refresh_token": refresh_token["token"],
-        "token_type": "bearer",
-        "expires_in": access_token["expires_in"],
-        "refresh_expires_in": refresh_token["expires_in"]
-	}
-
-	# create a json response object
-	response = JSONResponse(
-		content=content,
-		
-	)
-	response.set_cookie(
-		key="access_token", 
-		value=access_token["token"], 
-		httponly=True,
-		secure=True,
-		samesite="Lax",
-	)
-
-	
-	return response 
-
-
-@auth_router.post("/token", response_model=UserTokenResponse)
-async def access_token(data:OAuth2PasswordRequestForm=Depends(), db:Session=Depends(get_db)):
-	user = db.query(User).filter(User.username==data.username).first()
-	if not user:
-		raise HTTPException(
-			status_code=400,
-			detail="Invalid username or password"
-			)
-	
-	# if not verify_password(data.password, user.hashed_password):
-	if not hash_password(data.password) == user.hashed_password:
-		raise HTTPException(
-			status_code=400,
-			detail="Invalid username or password"
-		)
-
-	# check if user if active
-	if not user.is_active:
-		raise HTTPException(
-			status_code=400,
-			detail="User is not active. please activate your account throug email"
-			)
-	# create and return token here
-	access_token = create_access_token(data={"sub": str(user.id)})
-	
-	# refresh token
-	refresh_token = await create_refresh_token(
-		user_id=str(user.id),
-		db=db,
-		)
-	
-	
-	content =  {
-		"access_token": access_token["token"],
-        "refresh_token": refresh_token["token"],
-        "token_type": "bearer",
-        "expires_in": access_token["expires_in"],
-        "refresh_expires_in": refresh_token["expires_in"]
-	}
-
-	# create a json response object
-	response = JSONResponse(
-		content=content,
-		
-	)
-	response.set_cookie(
-		key="access_token", 
-		value=access_token["token"], 
-		httponly=True,
-		secure=True,
-		samesite="Lax",
-	)
-
-	return response
 
 
 @user_router.get("/me", response_model=UserResponse)
@@ -201,27 +81,6 @@ async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 	except Exception as e:
 		db.rollback()
 		raise HTTPException(status_code=500, detail="Internal server error")
-
-@auth_router.post("/activate")
-async def activate_user_account(data: UserLogin, db:Session = Depends(get_db)):
-	user = db.query(User).filter(User.username==data.username).first()
-	
-	if not user:
-		raise HTTPException(
-			status_code=400,
-			detail="User is not Registered"
-		)
-	if user.is_active:
-		raise HTTPException(
-			status_code=400,
-			detail="User is already active"
-		)
-
-	user.is_active=True
-	db.commit()
-	db.refresh(user)
-	return user
-
 
 @user_router.get("/", response_model=list[UserResponse])
 async def get_all_users(user:User=Depends(get_current_user), db:Session = Depends(get_db)):

@@ -1,8 +1,8 @@
-"""update on user full name
+"""bug fix - relationship 5
 
-Revision ID: b26ac6446aa9
-Revises: b19ef6c0dc6d
-Create Date: 2026-01-22 11:42:01.567395
+Revision ID: e6833dcfcc6d
+Revises: 37d7c6e9531b
+Create Date: 2026-01-29 09:54:48.665295
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'b26ac6446aa9'
-down_revision: Union[str, Sequence[str], None] = 'b19ef6c0dc6d'
+revision: str = 'e6833dcfcc6d'
+down_revision: Union[str, Sequence[str], None] = '37d7c6e9531b'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -58,9 +58,6 @@ def upgrade() -> None:
                existing_nullable=False)
 
     with op.batch_alter_table('user_profiles', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('fname', sa.String(length=100), nullable=True))
-        batch_op.add_column(sa.Column('mname', sa.String(length=100), nullable=True))
-        batch_op.add_column(sa.Column('lname', sa.String(length=100), nullable=True))
         batch_op.alter_column('id',
                existing_type=sa.NUMERIC(),
                type_=sa.UUID(),
@@ -69,7 +66,6 @@ def upgrade() -> None:
                existing_type=sa.NUMERIC(),
                type_=sa.UUID(),
                existing_nullable=False)
-        batch_op.drop_column('full_name')
 
     with op.batch_alter_table('user_roles', schema=None) as batch_op:
         batch_op.alter_column('id',
@@ -126,7 +122,6 @@ def downgrade() -> None:
                existing_nullable=False)
 
     with op.batch_alter_table('user_profiles', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('full_name', sa.VARCHAR(length=100), nullable=True))
         batch_op.alter_column('user_id',
                existing_type=sa.UUID(),
                type_=sa.NUMERIC(),
@@ -135,9 +130,6 @@ def downgrade() -> None:
                existing_type=sa.UUID(),
                type_=sa.NUMERIC(),
                existing_nullable=False)
-        batch_op.drop_column('lname')
-        batch_op.drop_column('mname')
-        batch_op.drop_column('fname')
 
     with op.batch_alter_table('roles', schema=None) as batch_op:
         batch_op.alter_column('id',

@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
-from typing import Optional
+from typing import Literal, Optional, List, Dict
 from uuid import uuid4, UUID
 from enum import Enum
 from app.models.exam import ExamTypeEnum
@@ -37,3 +37,25 @@ class ExamResponse(BaseModel):
     class Config:
         orm_mode = True
 
+ 
+
+
+class ContentType(str, Enum):
+    TEXT = "text"
+    IMAGE = "image"
+    FORMULA = "formula"
+
+class ContentBlock(BaseModel):
+    type: ContentType
+    value: str   # text, image path/URL, or LaTeX formula
+
+class OptionBlock(BaseModel):
+    content: List[ContentBlock]
+    is_answer: bool = False
+
+class MCQ(BaseModel):
+    department: str
+    course: str
+    module: str
+    question: List[ContentBlock]
+    options: Dict[str, OptionBlock]   # {"A": OptionBlock(...), "B": ...}

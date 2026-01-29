@@ -184,7 +184,9 @@ class User(Base):
     user_roles: Mapped[List['UserRole']] = relationship('UserRole', back_populates='user', cascade="all, delete-orphan", foreign_keys="UserRole.user_id")
     assigned_roles: Mapped[List['UserRole']] = relationship('UserRole', back_populates='assigner', foreign_keys="UserRole.assigned_by")
     profile: Mapped['UserProfile'] = relationship('UserProfile', back_populates='user')
+    refresh_tokens: Mapped[List['RefreshToken']] = relationship('RefreshToken', back_populates='user')
 
+    
     def __repr__(self):
         return f"{self.id}-{self.username}"
 

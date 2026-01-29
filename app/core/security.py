@@ -146,6 +146,17 @@ async def create_refresh_token(user_id: str, db) -> Dict[str, Any]:
     # Store refresh token in database (for invalidation)
     from app.models import RefreshToken
     import uuid
+
+    # Pseudocode
+    # existing_token = db.query(RefreshToken).filter_by(user_id=user_id, device_id=device_id).first()
+    # if existing_token:
+    #     existing_token.token_hash = hash_token(new_token)
+    #     existing_token.expires_at = new_expiry
+    #     existing_token.is_revoked = False
+    # else:
+    #     db.add(RefreshToken(...))
+    # db.commit()
+    
     db_refresh_token = RefreshToken(
         jti=jti,
         user_id=uuid.UUID(user_id),

@@ -1,5 +1,6 @@
+import re
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
 from uuid import uuid4
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime, timedelta
@@ -10,7 +11,7 @@ from app.models.exam import Exam, ExamQuestion, Question, Option, UserAnswer, Ex
 
 from app.core.database import get_db
 from app.api.deps.user import get_user, get_current_user
-from app.schemas.exam import ExamCreateRequest, ExamResponse 
+from app.schemas.exam import ExamCreateRequest, ExamResponse
 
 
 exam_router = APIRouter(
@@ -39,6 +40,8 @@ async def create_exam(data: ExamCreateRequest, db:Session=Depends(get_db), user:
         description=data.description,
         maximum_marks=data.maximum_marks,
         is_visible=False,
+        start_time=data.start_time,
+        end_time=data.end_time,
         created_at = datetime.utcnow(),
         updated_at = datetime.utcnow(),
         # questions=data.questions
@@ -65,6 +68,28 @@ async def add_questions_to_exam(exam_id: str, question_ids: List[str], db: Sessi
     db.commit()
     return {"message": "Questions allocated successfully"}
 
+@exam_router.post("/upload-questions", )
+async def import_mcq(file: UploadFile=File(...), db:Session=Depends(get_db)):
+    # import a utility function
+    from app.core.utils import  parse_text_mcq
+
+    if file.content_type != "text/plain":
+        raise HTTPException(
+            status_code=400, 
+            detail="Only .text files allowed",
+        )
+    
+    text = (await file.read()).decode('utf-8')
+    blocks = text.strip().split('\r\n\r\n')
+    questions =  parse_text_mcq(blocks)
+    
+
+    # return {
+    #     'count': len(questions),
+    #     'questions': questions,
+    # } 
+    return questions
+
 
 @exam_router.put("/{exam_id}/visibility")
 async def set_exam_visibility(exam_id: str, visible: bool, db: Session = Depends(get_db)):
@@ -88,11 +113,32 @@ async def schedule_exam(exam_id: str, start_time: datetime, end_time: datetime, 
 
     
 @exam_router.get("/available", response_model=List[ExamResponse])
-async def get_available_exams(db: Session = Depends(get_db)):
+async def get_available_exams(start_time: datetime = None, end_time:datetime=None, db: Session = Depends(get_db)):
     now = datetime.utcnow()
-    exams = db.query(Exam).filter(
-        Exam.is_visible == True,
-        Exam.start_time <= now,
-        Exam.end_time >= now
-    ).all()
+    
+    if start_time is not None and end_time is not None:
+
+        exams = db.query(Exam).filter(
+            Exam.is_visible == True,
+            Exam.start_time <= start_time,
+            Exam.end_time >= end_time
+        ).all()
+
+    if start_time is not None:
+        exams = db.query(Exam).filter(
+            Exam.is_visible == True,
+            Exam.start_time <= start_time,
+        ).all()
+    
+    if end_time is not None:
+        exams = db.query(Exam).filter(
+            Exam.is_visible == True,
+            Exam.end_time <= end_time,
+        ).all()
+
+    if start_time is None and end_time is None:
+        exams = db.query(Exam).filter(
+                Exam.is_visible == True,
+            ).all()
+    
     return exams

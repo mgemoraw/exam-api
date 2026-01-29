@@ -1,8 +1,8 @@
-"""updates on RBA tables
+"""fixing relationship errors
 
-Revision ID: ee0269363e2d
+Revision ID: 134cd415a113
 Revises: 
-Create Date: 2026-01-22 11:32:34.034385
+Create Date: 2026-01-29 09:33:49.993932
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ee0269363e2d'
+revision: str = '134cd415a113'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,7 +26,11 @@ def upgrade() -> None:
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('maximum_marks', sa.Integer(), nullable=False),
     sa.Column('duration_minutes', sa.Integer(), nullable=False),
+    sa.Column('exam_type', sa.Enum('MODEL_EXIT_EXAM', 'HOLISTIC_EXAM', 'ENTRANCE_EXAM', name='examtypeenum'), server_default='model exit exam', nullable=False),
     sa.Column('description', sa.String(), nullable=True),
+    sa.Column('is_visible', sa.Boolean(), nullable=True),
+    sa.Column('start_time', sa.DateTime(), nullable=True),
+    sa.Column('end_time', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
@@ -69,7 +73,7 @@ def upgrade() -> None:
     sa.Column('started_at', sa.DateTime(), nullable=True),
     sa.Column('expires_at', sa.DateTime(), nullable=False),
     sa.Column('score', sa.Float(), nullable=True),
-    sa.Column('completed_at', sa.String(), nullable=True),
+    sa.Column('completed_at', sa.DateTime(), nullable=True),
     sa.Column('status', sa.String(), nullable=False),
     sa.ForeignKeyConstraint(['exam_id'], ['exam.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
@@ -81,7 +85,8 @@ def upgrade() -> None:
     op.create_table('questions',
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('exam_id', sa.String(), nullable=False),
-    sa.Column('text', sa.String(), nullable=False),
+    sa.Column('content', sa.String(), nullable=False),
+    sa.Column('marks', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['exam_id'], ['exam.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -116,7 +121,9 @@ def upgrade() -> None:
     op.create_table('user_profiles',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('user_id', sa.UUID(), nullable=False),
-    sa.Column('full_name', sa.String(length=100), nullable=True),
+    sa.Column('fname', sa.String(length=100), nullable=True),
+    sa.Column('mname', sa.String(length=100), nullable=True),
+    sa.Column('lname', sa.String(length=100), nullable=True),
     sa.Column('bio', sa.String(length=255), nullable=True),
     sa.Column('avatar_url', sa.String(length=255), nullable=True),
     sa.Column('location', sa.String(length=100), nullable=True),
@@ -161,13 +168,24 @@ def upgrade() -> None:
     op.create_table('choices',
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('question_id', sa.String(), nullable=False),
-    sa.Column('text', sa.String(), nullable=False),
+    sa.Column('content', sa.String(), nullable=False),
     sa.Column('is_correct', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['question_id'], ['questions.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('choices', schema=None) as batch_op:
         batch_op.create_index(batch_op.f('ix_choices_id'), ['id'], unique=False)
+
+    op.create_table('exam_questions',
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('exam_id', sa.String(), nullable=False),
+    sa.Column('question_id', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['exam_id'], ['exam.id'], ),
+    sa.ForeignKeyConstraint(['question_id'], ['questions.id'], ),
+    sa.PrimaryKeyConstraint('id', 'exam_id', 'question_id')
+    )
+    with op.batch_alter_table('exam_questions', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_exam_questions_id'), ['id'], unique=False)
 
     op.create_table('user_answers',
     sa.Column('id', sa.String(), nullable=False),
@@ -192,6 +210,10 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f('ix_user_answers_id'))
 
     op.drop_table('user_answers')
+    with op.batch_alter_table('exam_questions', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_exam_questions_id'))
+
+    op.drop_table('exam_questions')
     with op.batch_alter_table('choices', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_choices_id'))
 
