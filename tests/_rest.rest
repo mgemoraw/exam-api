@@ -1,0 +1,28 @@
+# post client
+@BASE_URL=http://localhost:8000/
+### 
+
+### 
+GET {{BASE_URL}} HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+### 
+GET {{BASE_URL}} HTTP/1.1
+Content-Type: application/json
+{
+
+}
+
+###
+POST {{BASE_URL}}auth/login HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+username=sgetme&password=Root#12345
+
+### 
+POST {{BASE_URL}}auth/token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+username=sgetme&password=Root#12345
+
+###

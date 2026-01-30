@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Literal, Optional, List, Dict
 from uuid import uuid4, UUID
 from enum import Enum
@@ -19,6 +19,9 @@ class ExamCreateRequest(BaseModel):
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
 
+    # class Config:
+    #     from_attributes = True
+    model_config=ConfigDict(from_attributes=True)
 
 
 class ExamResponse(BaseModel):
@@ -34,8 +37,7 @@ class ExamResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config=ConfigDict(from_attributes=True)
 
  
 
@@ -53,9 +55,12 @@ class OptionBlock(BaseModel):
     content: List[ContentBlock]
     is_answer: bool = False
 
-class MCQ(BaseModel):
+class MCQCreateRequest(BaseModel):
     department: str
     course: str
     module: str
     question: List[ContentBlock]
     options: Dict[str, OptionBlock]   # {"A": OptionBlock(...), "B": ...}
+
+    created_at: Optional[datetime]=datetime.utcnow()
+    updated_at: Optional[datetime]=datetime.utcnow()

@@ -31,21 +31,23 @@ auth_router = APIRouter(
 
 
 @auth_router.post("/login")
-async def login(username: str, password:str, db: Session = Depends(get_db)):
+async def login(data: OAuth2PasswordRequestForm=Depends(), db: Session = Depends(get_db)):
 	"""
     Authenticate user and return access & refresh tokens
     """
 	# check if user exists
-	user = db.query(User).filter(User.username==username).first()
+	# clear names
+	user = db.query(User).filter(User.username==data.username).first()
 	if not user:
+		print("User name not cleared: ", user)
 		raise HTTPException(
 			status_code=400,
-			detail="User is not Registered"
+			detail=f"User {data.username} is not Registered"
 			)
 	
 	# verify password
 	# if not verify_password(user.password, db_user.hashed_password):
-	if not hash_password(password) == user.hashed_password:
+	if not hash_password(data.password) == user.hashed_password:
 		raise HTTPException(
 			status_code=400,
 			detail="Invalid username or password"

@@ -4,7 +4,7 @@ from fastapi import  Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from sqlalchemy.orm import Session
 from redis.asyncio import Redis
 from app.core.database import get_db    
@@ -73,15 +73,15 @@ def create_access_token(data: dict=Dict[str, Any], expires_delta: timedelta | No
     to_encode = data.copy()
     
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.now(UTC) + timedelta(minutes=15)
 
     # add token metadata
     jti = secrets.token_urlsafe(16)
     to_encode.update({
         "exp": expire,
-        "iat": datetime.utcnow(),
+        "iat": datetime.now(UTC),
         "jti": jti,  # Uniqe ID for this access toke
         "type": "access",
         "scope": "user_ccess",
@@ -91,7 +91,7 @@ def create_access_token(data: dict=Dict[str, Any], expires_delta: timedelta | No
     # payload = {
     #     "sub": data.get("sub"),
     #     "exp": expire,
-    #     "iat": datetime.utcnow(),
+    #     "iat": datetime.now(UTC),
     #     "type": "access",
     #     "jti": jti,
     #     "scope": "user_access"
@@ -122,7 +122,7 @@ async def create_refresh_token(user_id: str, db) -> Dict[str, Any]:
     jti = secrets.token_urlsafe(32)
     
     # Calculate expiration
-    expire = datetime.utcnow() + timedelta(
+    expire = datetime.now(UTC) + timedelta(
         days=settings.REFRESH_TOKEN_EXPIRE_DAYS
     )
     
@@ -130,7 +130,7 @@ async def create_refresh_token(user_id: str, db) -> Dict[str, Any]:
     payload = {
         "sub": user_id,
         "exp": expire,
-        "iat": datetime.utcnow(),
+        "iat": datetime.now(UTC),
         "type": "refresh",
         "jti": jti,
         "scope": "refresh"

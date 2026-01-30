@@ -13,7 +13,7 @@ from app.models.user import User
 from app.core.security import create_access_token, hash_password
 
 # Test database setup
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./_test.db"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},

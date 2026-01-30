@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from uuid import UUID
 from typing import Optional
 # from sqlalchemy.dialects.postgresql import UUID
@@ -18,8 +18,9 @@ class UserResponse(BaseModel):
 	is_superuser: bool
 	is_active: bool
 
-	class Config:
-		from_attributes = True
+	# class Config:
+	# 	from_attributes = True
+	model_config=ConfigDict(from_attributes=True)
 
 class UserLogin(BaseModel):
 	username: str
@@ -33,5 +34,4 @@ class TokenCreate(BaseModel):
 	expires_in: int
 	refresh_expires_in: int
 
-	class Config:
-		from_attributes = True
+	model_config=ConfigDict(from_attributes=True)
