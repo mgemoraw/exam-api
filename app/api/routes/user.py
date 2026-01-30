@@ -61,6 +61,7 @@ async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 	
 	try:
 		new_user = User(
+			# id=str(uuid4()),
 			username=user.username, 
 			email=user.email,
 			is_superuser=user.is_superuser,
@@ -83,7 +84,7 @@ async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 		raise HTTPException(status_code=500, detail="Internal server error")
 
 @user_router.get("/", response_model=list[UserResponse])
-async def get_all_users(user:User=Depends(get_current_user), db:Session = Depends(get_db)):
+async def get_all_users( db:Session = Depends(get_db)):
 	try:
 		users = db.query(User).all()
 		return users

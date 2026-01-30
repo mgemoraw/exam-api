@@ -142,3 +142,33 @@ async def get_available_exams(start_time: datetime = None, end_time:datetime=Non
             ).all()
     
     return exams
+
+
+
+@exam_router.post("/{exam_id}/attempts")
+async def start_exam_attempt(exam_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    exam = db.query(Exam).filter(Exam.id == exam_id).first()
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+    
+    # Check if user has already started an attempt
+    existing_attempt = db.query(ExamAttempt).filter(
+        ExamAttempt.exam_id == exam_id,
+        ExamAttempt.user_id == str(user.id),
+        ExamAttempt.is_completed == False
+    ).first()
+    if existing_attempt:
+        raise HTTPException(status_code=400, detail="You have already started this exam attempt")
+    
+    attempt = ExamAttempt(
+        id=str(uuid4()),
+        exam_id=exam_id,
+        user_id=str(user.id),
+        start_time=datetime.utcnow(),
+        is_completed=False
+    )
+    db.add(attempt)
+    db.commit()
+    db.refresh(attempt)
+    
+    return {"message": "Exam attempt started", "attempt_id": attempt.id}

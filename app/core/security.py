@@ -11,7 +11,7 @@ from app.core.database import get_db
 from app.models.user import User
 from app.core.config import settings
 
-
+import uuid 
 
 SECRET_KEY = "NKPD9W4hV/+YStZ+RejELM68Dw5okI5TrYrNWRcIf8q/OGfvxQXvtEirGA4yp9syAQkf3CWFqzH/nrV844dj8Q=="
 ALGORITHM = "HS256"
@@ -145,26 +145,25 @@ async def create_refresh_token(user_id: str, db) -> Dict[str, Any]:
     
     # Store refresh token in database (for invalidation)
     from app.models import RefreshToken
-    import uuid
 
-    # Pseudocode
-    # existing_token = db.query(RefreshToken).filter_by(user_id=user_id, device_id=device_id).first()
-    # if existing_token:
-    #     existing_token.token_hash = hash_token(new_token)
-    #     existing_token.expires_at = new_expiry
-    #     existing_token.is_revoked = False
-    # else:
-    #     db.add(RefreshToken(...))
-    # db.commit()
-    
-    db_refresh_token = RefreshToken(
+    # if refresh token for user already exists, update it
+    existing_token = db.query(RefreshToken).filter_by(user_id=uuid.UUID(user_id)).first()
+    if existing_token:
+        existing_token.token_hash = hash_token(token)
+        existing_token.expires_at = expire
+        existing_token.is_revoked = False
+    else:
+        # add new refresh token if not exists
+        db_refresh_token = RefreshToken(
         jti=jti,
         user_id=uuid.UUID(user_id),
         token_hash=hash_token(token),
         expires_at=expire,
         is_revoked=False
-    )
-    db.add(db_refresh_token)
+        )
+        db.add(db_refresh_token)
+
+    # Commit to database
     db.commit()
     
     # Also store in Redis for fast validation

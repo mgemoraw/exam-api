@@ -90,6 +90,12 @@ class ExamAttempt(Base):
     started_at: Mapped[DateTime] = Column(DateTime, default=datetime.utcnow)
     expires_at: Mapped[DateTime]  = Column(DateTime, nullable=False)
     score: Mapped[Optional[float]] = Column(Float, nullable=True)
+    
+    is_completed: Mapped[bool] = Column(Boolean, default=False)
+    is_passed: Mapped[Optional[bool]] = Column(Boolean, nullable=True)
+    is_expired: Mapped[bool] = Column(Boolean, default=False)
+    is_graded: Mapped[bool] = Column(Boolean, default=False)
+
     completed_at: Mapped[Optional[DateTime]] = Column(DateTime, nullable=True)
     status: Mapped[str] = Column(String, nullable=False) # IN_PROGRESS, COMPLETED, EXPIRE
 

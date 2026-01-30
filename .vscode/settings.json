@@ -1,3 +1,15 @@
 {
-    "materialkv.pythonFile": "main.py"
+  "materialkv.pythonFile": "main.py",
+  "python.testing.pytestArgs": ["."],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "database": "${workspaceFolder:exam-api}/data.db",
+      "name": "exam-api",
+      "group": "exam-api"
+    }
+  ]
 }

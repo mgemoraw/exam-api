@@ -5,6 +5,7 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column
 from typing import List, Optional
 from sqlalchemy.orm import relationship
+import uuid
 from uuid import uuid4
 from sqlalchemy.dialects.postgresql import UUID
 

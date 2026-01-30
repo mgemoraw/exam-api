@@ -31,12 +31,12 @@ auth_router = APIRouter(
 
 
 @auth_router.post("/login")
-async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login(username: str, password:str, db: Session = Depends(get_db)):
 	"""
     Authenticate user and return access & refresh tokens
     """
 	# check if user exists
-	user = db.query(User).filter(User.username==data.username).first()
+	user = db.query(User).filter(User.username==username).first()
 	if not user:
 		raise HTTPException(
 			status_code=400,
@@ -45,7 +45,7 @@ async def login(data: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 	
 	# verify password
 	# if not verify_password(user.password, db_user.hashed_password):
-	if not hash_password(data.password) == user.hashed_password:
+	if not hash_password(password) == user.hashed_password:
 		raise HTTPException(
 			status_code=400,
 			detail="Invalid username or password"
@@ -171,7 +171,16 @@ async def activate_user_account(username:str, db:Session = Depends(get_db)):
 @auth_router.delete("/{user_id}/refresh-tokens/delete")
 async def delete_refresh_tokens(user_id: UUID, db:Session=Depends(get_db)):
 	tokens = db.query(RefreshToken).filter_by(user_id=user_id).all()
+	for token in tokens:
+		db.delete(token)
+	db.commit()
+	return {"message": f"Deleted {len(tokens)} refresh tokens for user {user_id}"}
+
+@auth_router.delete("/refresh-tokens")
+async def delete_refresh_tokens(db:Session=Depends(get_db)):
+	tokens = db.query(RefreshToken).all()
 	return tokens
+
 
 
 
