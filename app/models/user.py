@@ -1,5 +1,5 @@
 # models/user.py
-from sqlalchemy import ForeignKey, String, Boolean, Column, DateTime, UniqueConstraint
+from sqlalchemy import ForeignKey, String, Boolean, Column, DateTime, UniqueConstraint, func 
 from sqlalchemy import Enum as SQLEnum
 
 from sqlalchemy.orm import Mapped, mapped_column
@@ -187,6 +187,7 @@ class User(Base):
     profile: Mapped['UserProfile'] = relationship('UserProfile', back_populates='user')
     refresh_tokens: Mapped[List['RefreshToken']] = relationship('RefreshToken', back_populates='user')
 
+    student_profile: Mapped['Student'] = relationship('Student', back_populates='user')
     
     def __repr__(self):
         return f"{self.id}-{self.username}"
@@ -230,3 +231,35 @@ class UserProfile(Base):
 
     def __repr__(self):
         return f"{self.fname} {self.mname} {self.lname}"
+    
+
+class Student(Base):
+    __tablename__ = "students"
+
+    id: Mapped[uuid4] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid4,
+        unique=True,
+        nullable=False,
+    )
+    user_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False
+    )
+    enrollment_number: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    
+    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
+
+    # relationships
+    user: Mapped['User'] = relationship('User', back_populates='student_profile', foreign_keys=[user_id])
+    
+    courses: Mapped[List['Course']] = relationship('Course', secondary="student_courses", back_populates='students')
+    
+    student_courses: Mapped[List['StudentCourse']] = relationship('StudentCourse', back_populates='student', cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<Student enrollment_number={self.enrollment_number}>"
+    
