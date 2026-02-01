@@ -13,9 +13,9 @@ class RefreshToken(Base):
     """Model for storing refresh tokens"""
     __tablename__ = "refresh_tokens"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=lambda:uuid.uuid4())
+    id = Column(String(36), primary_key=True, default=lambda:str(uuid.uuid4()))
     jti = Column(String(64), unique=True, index=True, nullable=False)  # JWT ID
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, )
     token_hash = Column(String(128), nullable=False)  # Hashed token for security
     expires_at = Column(DateTime(timezone=True), nullable=False)
     is_revoked = Column(Boolean, default=False)

@@ -12,6 +12,7 @@ from app.api.routes.user import  user_router
 from app.api.routes.auth import auth_router
 from app.api.routes.exam import exam_router
 from app.api.routes.school import school_router
+from app.api.routes.news import news_router
 
 from app.middlewares.auth_middleware import auth_middleware
 import logging
@@ -50,3 +51,4 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(exam_router)
 app.include_router(school_router)
+app.include_router(news_router)

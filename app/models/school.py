@@ -8,11 +8,11 @@ from .base import Base
 class University(Base):
     __tablename__ = "universities"
 
-    id :Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
-
+    # id :Mapped[str.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
+    id :Mapped[str] = mapped_column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(255), nullable=False)
     code = Column(String(100), unique=True, nullable=False)
-    address_id = Column(UUID(as_uuid=True), ForeignKey("addresses.id"), nullable=False)
+    address_id = Column(String(36), ForeignKey("addresses.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -25,10 +25,10 @@ class University(Base):
 class Faculty(Base):
     __tablename__ = "faculties"
 
-    id :Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
+    id :Mapped[str] = mapped_column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(255), nullable=False)
     code = Column(String(100), unique=True, nullable=False)
-    university_id = Column(UUID(as_uuid=True), ForeignKey("universities.id"), nullable=False)
+    university_id = Column(String(36), ForeignKey("universities.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -44,9 +44,9 @@ class Faculty(Base):
 class Department(Base):
     __tablename__ = "departments"
 
-    id :Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
+    id :Mapped[str] = mapped_column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(255), nullable=False)
-    faculty_id = Column(UUID(as_uuid=True), ForeignKey("faculties.id"), nullable=False)
+    faculty_id = Column(String(36), ForeignKey("faculties.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -59,9 +59,9 @@ class Department(Base):
 class Module(Base):
     __tablename__ = "modules"
 
-    id :Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
-    department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"), nullable=False)
-    faculty_id = Column(UUID(as_uuid=True), ForeignKey("faculties.id"), nullable=False)
+    id :Mapped[str] = mapped_column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    department_id = Column(String(36), ForeignKey("departments.id"), nullable=False)
+    faculty_id = Column(String(36), ForeignKey("faculties.id"), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(TEXT, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -76,12 +76,13 @@ class Module(Base):
 class Course(Base):
     __tablename__ = "courses"
 
-    id :Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
+    id :Mapped[str] = mapped_column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(255), nullable=False)
     code = Column(String(100), unique=True, nullable=False)
-    module_id = Column(UUID(as_uuid=True), ForeignKey("modules.id"), nullable=False)
-    department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"), nullable=False)
-
+    credits = Column(Integer, nullable=False)
+    
+    module_id = Column(String(36), ForeignKey("modules.id"), nullable=False)
+    department_id = Column(String(36), ForeignKey("departments.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -100,9 +101,9 @@ class Course(Base):
 class StudentCourse(Base):
     __tablename__ = "student_courses"
 
-    id :Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
-    student_id = Column(UUID(as_uuid=True), ForeignKey("students.id"), nullable=False)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), nullable=False)
+    id :Mapped[str] = mapped_column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    student_id = Column(String(36), ForeignKey("students.id"), nullable=False)
+    course_id = Column(String(36), ForeignKey("courses.id"), nullable=False)
     enrollment_date = Column(DateTime(timezone=True), server_default=func.now())
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())  

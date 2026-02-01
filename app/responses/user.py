@@ -4,7 +4,7 @@ from uuid import UUID
 from datetime import datetime
 
 class UserResponse(BaseModel):
-    id: UUID
+    id: UUID | str
     username: str
     email: EmailStr
     is_active: bool
@@ -24,7 +24,7 @@ class UserLoginResponse(BaseModel):
         from_attributes = True
 
 class UserProfileResponse(BaseModel):
-    id: UUID
+    id: UUID | str
     username: str
     email: EmailStr
     is_active: bool

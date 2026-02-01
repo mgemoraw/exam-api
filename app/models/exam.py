@@ -12,6 +12,8 @@ from app.models.base import Base
 from enum import Enum
 
 
+
+
 class ExamTypeEnum(str, Enum):
     MODEL_EXIT_EXAM = 'model exit exam'
     HOLISTIC_EXAM = 'holistic exam'
@@ -26,8 +28,8 @@ EXAM_TYPE_LABELS = {
 
 class Exam(Base):
     __tablename__ = "exam"
-    id: Mapped[UUID] = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    title: Mapped[int] = Column(String, nullable=False)
+    id: Mapped[str] = Column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    title: Mapped[str] = Column(String(255), nullable=False)
     maximum_marks: Mapped[int] = Column(Integer, default=100, nullable=False)
     duration_minutes: Mapped[int] = Column(Integer, nullable=False)
     exam_type = Column(SQLEnum(ExamTypeEnum), server_default=ExamTypeEnum.MODEL_EXIT_EXAM.value, nullable=False)
@@ -37,17 +39,19 @@ class Exam(Base):
     start_time = Column(DateTime, nullable=True) # when exam becomes visible
     end_time = Column(DateTime, nullable=True)   # when exam closes
     created_at = Column(DateTime, default=datetime.utcnow())
+    created_by: Mapped[str] = Column(String(36), ForeignKey('users.id'), nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow())
 
     # relationships
     exam_questions: Mapped[List["ExamQuestion"]] = relationship("ExamQuestion", back_populates="exam", cascade="all, delete-orphan")
     attempts: Mapped[List['ExamAttempt']] = relationship('ExamAttempt', back_populates='exam', foreign_keys='ExamAttempt.exam_id')
+    user:Mapped['User'] = relationship('User', back_populates='created_exams', foreign_keys=[created_by])
 
 class Question(Base):
     __tablename__ = "questions"
-    id: Mapped[UUID] = Column(String, primary_key=True, index=True,default=lambda: str(uuid.uuid4()))
-    exam_id: Mapped[UUID] = Column(String, ForeignKey('exam.id'), nullable=False)
-    content: Mapped[str] = Column(String, nullable=False)
+    id: Mapped[str] = Column(String(36), primary_key=True, index=True,default=lambda: str(uuid.uuid4()))
+    exam_id: Mapped[str] = Column(String(36), ForeignKey('exam.id'), nullable=False)
+    content: Mapped[str] = Column(String(255), nullable=False)
     marks: Mapped[int] = Column(Integer, default=1)
 
     # relationships
@@ -60,9 +64,9 @@ class Question(Base):
 
 class Option(Base):
     __tablename__ = "choices"
-    id: Mapped[UUID] = Column(String, primary_key=True, index=True, default=lambda:str(uuid.uuid4()))
-    question_id: Mapped[UUID] = Column(String, ForeignKey('questions.id'), nullable=False)
-    content: Mapped[str] = Column(String, nullable=False)
+    id: Mapped[str] = Column(String(36), primary_key=True, index=True, default=lambda:str(uuid.uuid4()))
+    question_id: Mapped[str] = Column(String(36), ForeignKey('questions.id'), nullable=False)
+    content: Mapped[str] = Column(String(255), nullable=False)
     is_correct: Mapped[bool] = Column(Boolean, default=False)
 
     # relationships
@@ -73,9 +77,9 @@ class Option(Base):
 
 class ExamQuestion(Base):
     __tablename__ = "exam_questions"
-    id: Mapped[UUID] = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    exam_id: Mapped[str] = Column(String, ForeignKey("exam.id"), primary_key=True)
-    question_id: Mapped[UUID] = Column(String, ForeignKey("questions.id"), primary_key=True)
+    id: Mapped[str] = Column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    exam_id: Mapped[str] = Column(String(36), ForeignKey("exam.id"), primary_key=True)
+    question_id: Mapped[str] = Column(String(36), ForeignKey("questions.id"), primary_key=True)
 
 
     # relationships
@@ -84,11 +88,11 @@ class ExamQuestion(Base):
 
 class ExamAttempt(Base):
     __tablename__ = "exam_attempt"
-    id: Mapped[UUID] = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    user_id: Mapped[str] = Column(String, ForeignKey('users.id'), nullable=False)
-    exam_id: Mapped[str] = Column(String, ForeignKey('exam.id'), nullable=False)
-    started_at: Mapped[DateTime] = Column(DateTime, default=datetime.utcnow)
-    expires_at: Mapped[DateTime]  = Column(DateTime, nullable=False)
+    id: Mapped[str] = Column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = Column(String(36), ForeignKey('users.id'), nullable=False)
+    exam_id: Mapped[str] = Column(String(36), ForeignKey('exam.id'), nullable=False)
+    started_at: Mapped[DateTime] = Column(DateTime(timezone=True), default=datetime.utcnow)
+    expires_at: Mapped[DateTime]  = Column(DateTime(timezone=True), nullable=False)
     score: Mapped[Optional[float]] = Column(Float, nullable=True)
     
     is_completed: Mapped[bool] = Column(Boolean, default=False)
@@ -96,9 +100,11 @@ class ExamAttempt(Base):
     is_expired: Mapped[bool] = Column(Boolean, default=False)
     is_graded: Mapped[bool] = Column(Boolean, default=False)
 
-    completed_at: Mapped[Optional[DateTime]] = Column(DateTime, nullable=True)
-    status: Mapped[str] = Column(String, nullable=False) # IN_PROGRESS, COMPLETED, EXPIRE
-
+    completed_at: Mapped[Optional[DateTime]] = Column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = Column(String(50), nullable=False) # IN_PROGRESS, COMPLETED, EXPIRE
+    created_at: Mapped[DateTime] = Column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at: Mapped[DateTime] = Column(DateTime(timezone=True), default=datetime.utcnow)
+    
     # relationships
     user = relationship('User', back_populates='exam_attempts')
     exam:Mapped['Exam'] = relationship('Exam', back_populates='attempts', foreign_keys=[exam_id])
@@ -108,9 +114,9 @@ class ExamAttempt(Base):
 
 class AttemptQuestion(Base):
     __tablename__ = "attempt_question"
-    id: Mapped[UUID] = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    attempt_id: Mapped[UUID] = Column(String, ForeignKey('exam_attempt.id'), nullable=False)
-    question_id: Mapped[UUID] = Column(String, ForeignKey('questions.id'), nullable=False)
+    id: Mapped[str] = Column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    attempt_id: Mapped[str] = Column(String(36), ForeignKey('exam_attempt.id'), nullable=False)
+    question_id: Mapped[str] = Column(String(36), ForeignKey('questions.id'), nullable=False)
     order_index: Mapped[int] = Column(Integer, nullable=False)
 
     # relationshoips
@@ -121,11 +127,12 @@ class AttemptQuestion(Base):
 
 class UserAnswer(Base):
     __tablename__ = "user_answers"
-    id: Mapped[UUID] = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    attempt_id: Mapped[UUID] = Column(String, ForeignKey('exam_attempt.id'), nullable=False)    
-    question_id: Mapped[UUID] = Column(String, ForeignKey('questions.id'), nullable=False)
-    attempt_question_id: Mapped[UUID] = Column(String, ForeignKey('attempt_question.id'), nullable=True)
-    selected_option_id: Mapped[UUID] | None = Column(String, ForeignKey('choices.id'), nullable=True)    
+    id: Mapped[str] = Column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    attempt_id: Mapped[str] = Column(String(36), ForeignKey('exam_attempt.id'), nullable=False)    
+    question_id: Mapped[str] = Column(String(36), ForeignKey('questions.id'), nullable=False)
+    attempt_question_id: Mapped[str] = Column(String(36), ForeignKey('attempt_question.id'), nullable=True)
+    selected_option_id: Mapped[str | None] = Column(String(36), ForeignKey('choices.id'), nullable=True)    
+
 
     # relationships
     attempt: Mapped['ExamAttempt'] = relationship('ExamAttempt', back_populates='user_answers')

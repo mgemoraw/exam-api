@@ -61,7 +61,6 @@ async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 	
 	try:
 		new_user = User(
-			# id=str(uuid4()),
 			username=user.username, 
 			email=user.email,
 			is_superuser=user.is_superuser,

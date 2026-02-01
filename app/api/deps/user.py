@@ -28,7 +28,7 @@ def get_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db))
         if user_id is None:
             raise credentials_exception
         
-        user = db.get(User, UUID(user_id))
+        user = db.get(User, str(user_id))
         # user = db.query(User).filter(User.id == UUID(user_id)).first()
         if user is None:
             raise credentials_exception
@@ -53,7 +53,7 @@ def get_current_user(token: str=Depends(oauth2_scheme), db:Session=Depends(get_d
         if user_id is None:
             raise credentials_exception
         
-        user = db.get(User, UUID(user_id))
+        user = db.get(User, str(user_id))
         # user = db.query(User).filter(User.id == UUID(user_id)).first()
         if user is None:
             raise credentials_exception

@@ -25,7 +25,7 @@ class ExamCreateRequest(BaseModel):
 
 
 class ExamResponse(BaseModel):
-    id: str
+    id: UUID | str
     title: str
     maximum_marks: int
     duration_minutes: int
@@ -36,11 +36,23 @@ class ExamResponse(BaseModel):
     end_time: Optional[datetime]
     created_at: datetime
     updated_at: datetime
-
+    questions: Optional[List['ExamQuestionResponse']] = None
     model_config=ConfigDict(from_attributes=True)
 
- 
 
+class ExamQuestionResponse(BaseModel):
+    id: UUID | str
+    question: 'QuestionResponse'
+    model_config=ConfigDict(from_attributes=True)
+
+class QuestionResponse(BaseModel):
+    id: UUID | str
+    department: str
+    course: str
+    module: str
+    question: List['ContentBlock']
+    options: Dict[str, 'OptionBlock']   # {"A": OptionBlock(...), "B": ...}
+    model_config=ConfigDict(from_attributes=True)
 
 class ContentType(str, Enum):
     TEXT = "text"

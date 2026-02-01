@@ -147,7 +147,7 @@ async def create_refresh_token(user_id: str, db) -> Dict[str, Any]:
     from app.models import RefreshToken
 
     # if refresh token for user already exists, update it
-    existing_token = db.query(RefreshToken).filter_by(user_id=uuid.UUID(user_id)).first()
+    existing_token = db.query(RefreshToken).filter_by(user_id=str(user_id)).first()
     if existing_token:
         existing_token.token_hash = hash_token(token)
         existing_token.expires_at = expire
@@ -156,7 +156,7 @@ async def create_refresh_token(user_id: str, db) -> Dict[str, Any]:
         # add new refresh token if not exists
         db_refresh_token = RefreshToken(
         jti=jti,
-        user_id=uuid.UUID(user_id),
+        user_id=str(user_id),
         token_hash=hash_token(token),
         expires_at=expire,
         is_revoked=False

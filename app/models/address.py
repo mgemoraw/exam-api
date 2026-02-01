@@ -8,10 +8,10 @@ from .base import Base
 
 class Address(Base):
     __tablename__ = "addresses"
-    id:Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), 
+    id:Mapped[str] = mapped_column(
+        String(36), 
         primary_key=True, 
-        default=uuid.uuid4
+        default=lambda: str(uuid.uuid4())
     )
     street = Column(String(255), nullable=False)
     city = Column(String(255), nullable=False)

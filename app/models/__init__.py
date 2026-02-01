@@ -20,7 +20,7 @@ from .exam import (
 from.auth import RefreshToken
 from .school import Course, StudentCourse, Department, Faculty, Module, University
 from .address import Address
-
+from .news import News
 
 __all__ = [
     "User",
@@ -44,4 +44,5 @@ __all__ = [
 	"Module",
 	"University",
 	"Address",
+	"News",
 ]

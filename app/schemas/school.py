@@ -13,7 +13,7 @@ class UniversityCreateRequest(BaseModel):
     model_config=ConfigDict(from_attributes=True)
 
 class UniversityResponse(BaseModel):
-    id: UUID
+    id: UUID | str
     name: str
     code: str
     address_id: Optional[UUID]= None
@@ -39,7 +39,7 @@ class FacultyCreateRequest(BaseModel):
 
 
 class FacultyResponse(BaseModel):
-    id: UUID
+    id: UUID | str
     name: str
     code: str
     university: Optional['UniversityResponse'] = None
@@ -59,7 +59,7 @@ class DepartmentCreateRequest(BaseModel):
 
 
 class DepartmentResponse(BaseModel):
-    id: UUID
+    id: UUID | str
     name: str
     facuulty: Optional['FacultyResponse'] = None
     created_at: Optional[datetime] = None
@@ -81,12 +81,12 @@ class ModuleCreateRequest(BaseModel):
     description: Optional[str] = None
     university_code: Optional[str]=None
     faculty_code: Optional[str]=None
-    department_code: Optional[str]=None
+    department_name: Optional[str]=None
 
     model_config=ConfigDict(from_attributes=True)
 
 class ModuleResponse(BaseModel):
-    id: UUID
+    id: UUID | str
     title: str
     description: Optional[str] = None
     faculty: Optional['FacultyResponse'] = None
@@ -105,14 +105,14 @@ class ModuleUpdateRequest(BaseModel):
 class CourseCreateRequest(BaseModel):
     name: str
     code: str
-    faculty_code: Optional[str]=None
+    credits: int
     department_name: Optional[str]=None
-    module_name: Optional[str]=None
+    module_title: Optional[str]=None
 
     model_config=ConfigDict(from_attributes=True)
 
 class CourseResponse(BaseModel):
-    id: UUID
+    id: UUID | str
     name: str
     code: str
     module: Optional['ModuleResponse'] = None

@@ -39,10 +39,10 @@ class PermissionName(str, Enum):
 class Role(Base):
     __tablename__ = "roles"
 
-    id: Mapped[uuid4] = mapped_column(
-        UUID(as_uuid=True),
+    id: Mapped[str] = mapped_column(
+        String(36),
         primary_key=True,
-        default=uuid4,
+        default=lambda: str(uuid.uuid4()),
         unique=True,
         nullable=False,
     )
@@ -62,27 +62,27 @@ class UserRole(Base):
     __tablename__ = 'user_roles'
     __table_args__ = (UniqueConstraint("user_id", "role_id", name="uq_user_role"),)
 
-    id: Mapped[uuid4] = mapped_column(
-        UUID(as_uuid=True),
+    id: Mapped[str] = mapped_column(
+        String(36),
         primary_key=True,
-        default=uuid4,
+        default=lambda: str(uuid.uuid4()),
         unique=True,
         nullable=False,
     )
-    user_id: Mapped[UUID] = mapped_column(
-    UUID(as_uuid=True),
-    ForeignKey("users.id"),
-    nullable=False,
+    user_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("users.id"),
+        nullable=False,
     )
-    role_id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True),
+    role_id: Mapped[str] = mapped_column(
+        String(36),
         ForeignKey('roles.id'),
         nullable=False
     )
-    assigned_by: Mapped[UUID]  = mapped_column(
-    UUID(as_uuid=True),
-    ForeignKey("users.id"),
-    nullable=False, 
+    assigned_by: Mapped[str]  = mapped_column(
+        String(36),
+        ForeignKey("users.id"),
+        nullable=False, 
     )
     assigned_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow(),
@@ -100,10 +100,10 @@ class UserRole(Base):
 
 class Permission(Base):
     __tablename__ = 'permissions'
-    id: Mapped[uuid4] = mapped_column(
-        UUID(as_uuid=True),
+    id: Mapped[str] = mapped_column(
+        String(36),
         primary_key=True,
-        default=uuid4,
+        default=lambda: str(uuid.uuid4()),
         unique=True,
         nullable=False,
     )
@@ -129,20 +129,20 @@ class RolePermission(Base):
     __tablename__ = 'role_permissions'
     __table_args__ = (UniqueConstraint("role_id", "permission_id", name="uq_role_permission"),)
 
-    id: Mapped[uuid4] = mapped_column(
-        UUID(as_uuid=True),
+    id: Mapped[str] = mapped_column(
+        String(36),
         primary_key=True,
-        default=uuid4,
+        default=lambda: str(uuid.uuid4()),
         unique=True,
         nullable=False,
     )
-    role_id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True),
+    role_id: Mapped[str] = mapped_column(
+        String(36),
         ForeignKey('roles.id'),
         nullable=False
     )
-    permission_id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True),
+    permission_id: Mapped[str] = mapped_column(
+        String(36),
         ForeignKey('permissions.id'),
         nullable=False
     )
@@ -159,10 +159,10 @@ class RolePermission(Base):
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[uuid4] = mapped_column(
-        UUID(as_uuid=True),
+    id: Mapped[str] = mapped_column(
+        String(36),
         primary_key=True,
-        default=uuid4,
+        default=lambda: str(uuid.uuid4()),
         unique=True,
         nullable=False,
     )
@@ -182,12 +182,15 @@ class User(Base):
     exam_attempts: Mapped[List['ExamAttempt']] = relationship('ExamAttempt', back_populates="user", )
 
     # relationships
-    user_roles: Mapped[List['UserRole']] = relationship('UserRole', back_populates='user', cascade="all, delete-orphan", foreign_keys="UserRole.user_id")
-    assigned_roles: Mapped[List['UserRole']] = relationship('UserRole', back_populates='assigner', foreign_keys="UserRole.assigned_by")
-    profile: Mapped['UserProfile'] = relationship('UserProfile', back_populates='user')
-    refresh_tokens: Mapped[List['RefreshToken']] = relationship('RefreshToken', back_populates='user')
+    user_roles: Mapped[List['UserRole']] = relationship('UserRole', back_populates='user', cascade="all, delete-orphan", foreign_keys="UserRole.user_id",)
+    assigned_roles: Mapped[List['UserRole']] = relationship('UserRole', back_populates='assigner', foreign_keys="UserRole.assigned_by", cascade="all, delete-orphan",)
+    profile: Mapped['UserProfile'] = relationship('UserProfile', back_populates='user', cascade="all, delete-orphan", uselist=False)
+    refresh_tokens: Mapped[List['RefreshToken']] = relationship('RefreshToken', back_populates='user', cascade="all, delete-orphan")
 
-    student_profile: Mapped['Student'] = relationship('Student', back_populates='user')
+    student_profile: Mapped['Student'] = relationship('Student', back_populates='user', cascade="all, delete-orphan")
+    created_exams: Mapped[List['Exam']] = relationship('Exam', back_populates='user', foreign_keys='Exam.created_by')
+
+    news_items: Mapped[List['News']] = relationship('News', back_populates='creator', foreign_keys='News.created_by')
     
     def __repr__(self):
         return f"{self.id}-{self.username}"
@@ -196,17 +199,17 @@ class User(Base):
 class UserProfile(Base):
     __tablename__ = "user_profiles"
 
-    id: Mapped[uuid4] = mapped_column(
-        UUID(as_uuid=True),
+    id: Mapped[str] = mapped_column(
+        String(36),
         primary_key=True,
-        default=uuid4,
+        default=lambda: str(uuid.uuid4()),
         unique=True,
         nullable=False,
     )
-    user_id: Mapped[UUID] = mapped_column(
-    UUID(as_uuid=True),
-    ForeignKey("users.id"),
-    nullable=False
+    user_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("users.id"),
+        nullable=False
     )
 
     fname: Mapped[str] = mapped_column(String(100), nullable=True)
@@ -236,15 +239,15 @@ class UserProfile(Base):
 class Student(Base):
     __tablename__ = "students"
 
-    id: Mapped[uuid4] = mapped_column(
-        UUID(as_uuid=True),
+    id: Mapped[str] = mapped_column(
+        String(36),
         primary_key=True,
-        default=uuid4,
+        default=lambda: str(uuid.uuid4()),
         unique=True,
         nullable=False,
     )
-    user_id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True),
+    user_id: Mapped[str] = mapped_column(
+        String(36),
         ForeignKey("users.id"),
         nullable=False
     )
@@ -254,7 +257,7 @@ class Student(Base):
     updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
 
     # relationships
-    user: Mapped['User'] = relationship('User', back_populates='student_profile', foreign_keys=[user_id])
+    user: Mapped['User'] = relationship('User', back_populates='student_profile', foreign_keys=[user_id],)
     
     courses: Mapped[List['Course']] = relationship('Course', secondary="student_courses", back_populates='students')
     

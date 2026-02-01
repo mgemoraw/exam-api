@@ -13,7 +13,7 @@ class AddressCreateRequest(BaseModel):
     model_config=ConfigDict(from_attributes=True)
 
 class AddressResponse(BaseModel):
-    id: UUID
+    id: UUID | str
     street: str
     city: str
     state: str

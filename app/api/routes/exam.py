@@ -20,14 +20,11 @@ exam_router = APIRouter(
 	)
 
 
-@exam_router.get("/")
+@exam_router.get("/", response_model=List[ExamResponse])
 async def greetings(user: User = Depends(get_current_user), db:Session=Depends(get_db)):
 	exams = db.query(Exam).all()
      
-	return {
-			"message": "Hello Examination",
-			"data": exams
-           }	
+	return exams	
 
 @exam_router.post("/", response_model=ExamResponse)
 async def create_exam(data: ExamCreateRequest, db:Session=Depends(get_db), user:User=Depends(get_current_user)):
@@ -43,6 +40,7 @@ async def create_exam(data: ExamCreateRequest, db:Session=Depends(get_db), user:
         start_time=data.start_time,
         end_time=data.end_time,
         created_at = datetime.utcnow(),
+        create_exam_by = str(user.id),
         updated_at = datetime.utcnow(),
         # questions=data.questions
     )
@@ -57,7 +55,6 @@ async def create_exam(data: ExamCreateRequest, db:Session=Depends(get_db), user:
         db.rollback()
         raise e
         raise HTTPException(status_code=500, detail="Internal server error")
-
 
 
 @exam_router.post("/{exam_id}/questions")

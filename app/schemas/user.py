@@ -5,7 +5,7 @@ from typing import Optional
 # from sqlalchemy.dialects.postgresql import UUID
 
 class UserCreate(BaseModel):
-	id: UUID
+	id: UUID | str
 	username: str
 	email: Optional[EmailStr]
 	is_superuser: Optional[bool] = False
@@ -13,7 +13,7 @@ class UserCreate(BaseModel):
 
 
 class UserResponse(BaseModel):
-	id: UUID
+	id: UUID | str
 	username: str
 	email: Optional[EmailStr]
 	is_superuser: bool
@@ -58,7 +58,7 @@ class RoleCreate(BaseModel):
 	model_config=ConfigDict(from_attributes=True)
 	
 class RoleResponse(BaseModel):
-	id: UUID
+	id: UUID | str
 	name: str
 	description: Optional[str] = None
 
@@ -72,34 +72,34 @@ class PermissionCreate(BaseModel):
 
 
 class PermissionResponse(BaseModel):
-	id: UUID
+	id: UUID | str
 	name: str
 	description: Optional[str] = None
 
 	model_config=ConfigDict(from_attributes=True)
 
 class RolePermissionCreate(BaseModel):
-	role_id: UUID
-	permission_id: UUID
+	role_id: UUID | str
+	permission_id: UUID | str
 
 	model_config=ConfigDict(from_attributes=True)
 
 class RolePermissionResponse(BaseModel):
-	id: UUID
-	role_id: UUID
-	permission_id: UUID
+	id: UUID | str
+	role_id: UUID | str
+	permission_id: UUID | str
 
 	model_config=ConfigDict(from_attributes=True)
 
 class UserRoleAssignRequest(BaseModel):
-	user_id: UUID
-	role_id: UUID
+	user_id: UUID | str
+	role_id: UUID | str
 
 	model_config=ConfigDict(from_attributes=True)
 class UserRoleResponse(BaseModel):
-	id: UUID
-	user_id: UUID
-	role_id: UUID
+	id: UUID | str
+	user_id: UUID | str
+	role_id: UUID | str
 
 	model_config=ConfigDict(from_attributes=True)
 
@@ -113,7 +113,7 @@ class UserUpdateRequest(BaseModel):
 	model_config=ConfigDict(from_attributes=True)
 
 class UserResponseWithRoles(BaseModel):
-	id: UUID
+	id: UUID | str
 	username: str
 	email: Optional[EmailStr]
 	is_superuser: bool
@@ -124,7 +124,7 @@ class UserResponseWithRoles(BaseModel):
 
 
 class UserResponseWithPermissions(BaseModel):
-	id: UUID
+	id: UUID | str
 	username: str
 	email: Optional[EmailStr]
 	is_superuser: bool
@@ -172,8 +172,8 @@ class UserProfileCreateRequest(BaseModel):
 	model_config=ConfigDict(from_attributes=True)
 
 class UserProfileResponse(BaseModel):
-	id: UUID
-	user_id: UUID
+	id: UUID | str
+	user_id: UUID | str
 	fname: str
 	mname: str
 	lname: str 
