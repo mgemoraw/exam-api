@@ -13,9 +13,13 @@ COPY requirements.txt .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+# RUN uv sync --frozen --no-cache
+
+# Install uv .
+# COPY --from=ghcr .io/astral-sh/uv:lastest /uv /uvx /bin/
 
 # Copy project files
-COPY . .
+COPY . /app
 
 # Expose port (change if your app uses a different port)
 EXPOSE 8000
@@ -25,3 +29,4 @@ ENV PYTHONUNBUFFERED=1
 
 # Command to run the application (adjust as needed)
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["/app/.venv/bin/uvicorn", "run", "app/main.py", "--host", "0.0.0.0", "--port", "8000"]
