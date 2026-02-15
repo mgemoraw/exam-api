@@ -11,7 +11,7 @@ from app.models.exam import Exam, ExamQuestion, Question, Option, UserAnswer, Ex
 
 from app.core.database import get_db
 from app.api.deps.user import get_user, get_current_user
-from app.schemas.exam import ExamCreateRequest, ExamResponse
+from app.schemas.exam import AddQuestionsRequest, ExamCreateRequest, ExamResponse, AnswerSubmitRequest
 
 
 exam_router = APIRouter(
@@ -19,6 +19,10 @@ exam_router = APIRouter(
 	tags=['Exam'],
 	)
 
+question_router = APIRouter(
+    prefix="/questions",
+    tags=["Questions"],
+)
 
 @exam_router.get("/", response_model=List[ExamResponse])
 async def greetings(user: User = Depends(get_current_user), db:Session=Depends(get_db)):
@@ -42,7 +46,7 @@ async def create_exam(data: ExamCreateRequest, db:Session=Depends(get_db), user:
         created_at = datetime.utcnow(),
         create_exam_by = str(user.id),
         updated_at = datetime.utcnow(),
-        # questions=data.questions
+        # questions=data.questions,
     )
         
     try:
@@ -55,6 +59,324 @@ async def create_exam(data: ExamCreateRequest, db:Session=Depends(get_db), user:
         db.rollback()
         raise e
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@exam_router.post("/{exam_id}/questions")
+async def add_questions_to_exam(
+    exam_id: str,
+    data: AddQuestionsRequest,
+    db: Session = Depends(get_db),
+):
+    exam = db.query(Exam).filter(Exam.id == exam_id).first()
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    for index, question_id in enumerate(data.question_ids):
+        link = ExamQuestion(
+            exam_id=exam_id,
+            question_id=question_id,
+            order=index + 1,
+        )
+        db.add(link)
+
+    db.commit()
+
+    return {"message": "Questions added successfully"}
+
+
+@question_router.post("/upload")
+async def upload_questions(
+    file: UploadFile,
+    db: Session = Depends(get_db)
+):
+    # parse file
+    # create question objects
+    # save to DB
+    # return list of question IDs
+
+    return None
+
+# POST /exams/{exam_id}/start
+@exam_router.post("/{exam_id}/start")
+async def student_start_exam(
+    exam_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    exam = db.query(Exam).filter(Exam.id == exam_id).first()
+
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    # Check visibility
+    if not exam.is_visible:
+        raise HTTPException(status_code=403, detail="Exam not available")
+
+    # Check time window
+    now = datetime.utcnow()
+    if exam.start_time and now < exam.start_time:
+        raise HTTPException(status_code=403, detail="Exam has not started yet")
+
+    if exam.end_time and now > exam.end_time:
+        raise HTTPException(status_code=403, detail="Exam has ended")
+
+    # Prevent duplicate attempt
+    existing_attempt = (
+        db.query(ExamAttempt)
+        .filter(
+            ExamAttempt.exam_id == exam_id,
+            ExamAttempt.student_id == user.id,
+            ExamAttempt.is_completed == False
+        )
+        .first()
+    )
+
+    if existing_attempt:
+        return existing_attempt
+
+    attempt = ExamAttempt(
+        exam_id=exam_id,
+        student_id=user.id,
+        start_time=now,
+        is_completed=False,
+    )
+
+    db.add(attempt)
+    db.commit()
+    db.refresh(attempt)
+
+    return attempt
+
+# GET /attempts/{attempt_id}/questions
+@exam_router.get("/attempts/{attempt_id}/questions")
+async def student_exam_attempted_questions(
+    attempt_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    attempt = (
+        db.query(ExamAttempt)
+        .filter(ExamAttempt.id == attempt_id)
+        .first()
+    )
+
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Attempt not found")
+
+    # Ownership validation
+    if attempt.student_id != user.id:
+        raise HTTPException(status_code=403, detail="Unauthorized access")
+
+    if attempt.is_completed:
+        raise HTTPException(status_code=400, detail="Exam already submitted")
+
+    # Timer validation
+    exam = db.query(Exam).filter(Exam.id == attempt.exam_id).first()
+
+    now = datetime.utcnow()
+    elapsed = (now - attempt.start_time).total_seconds() / 60
+
+    if elapsed > exam.duration_minutes:
+        raise HTTPException(status_code=400, detail="Time expired")
+
+    # Get questions
+    exam_questions = (
+        db.query(ExamQuestion)
+        .filter(ExamQuestion.exam_id == exam.id)
+        .order_by(ExamQuestion.order)
+        .all()
+    )
+
+    question_ids = [eq.question_id for eq in exam_questions]
+
+    questions = (
+        db.query(Question)
+        .filter(Question.id.in_(question_ids))
+        .all()
+    )
+
+    # Remove correct answers before sending
+    response = []
+    for q in questions:
+        response.append({
+            "id": q.id,
+            "content": q.content,
+            "options": q.options,  # assuming JSON field
+        })
+
+    return response
+
+
+# POST /attempts/{attempt_id}/answer
+@exam_router.post("/attempts/{attempt_id}/answer")
+async def student_exam_attempted_answers(
+    attempt_id: str,
+    data: AnswerSubmitRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    attempt = (
+        db.query(ExamAttempt)
+        .filter(ExamAttempt.id == attempt_id)
+        .first()
+    )
+
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Attempt not found")
+
+    if attempt.student_id != user.id:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+
+    if attempt.is_completed:
+        raise HTTPException(status_code=400, detail="Exam already submitted")
+
+    exam = db.query(Exam).filter(Exam.id == attempt.exam_id).first()
+
+    # Timer validation
+    now = datetime.utcnow()
+    elapsed = (now - attempt.start_time).total_seconds() / 60
+
+    if elapsed > exam.duration_minutes:
+        raise HTTPException(status_code=400, detail="Time expired")
+
+    # Check if question belongs to exam
+    link = (
+        db.query(ExamQuestion)
+        .filter(
+            ExamQuestion.exam_id == exam.id,
+            ExamQuestion.question_id == data.question_id
+        )
+        .first()
+    )
+
+    if not link:
+        raise HTTPException(status_code=400, detail="Invalid question")
+
+    # Check if answer already exists
+    existing_answer = (
+        db.query(UserAnswer)
+        .filter(
+            UserAnswer.attempt_id == attempt_id,
+            UserAnswer.question_id == data.question_id
+        )
+        .first()
+    )
+
+    if existing_answer:
+        existing_answer.selected_option = data.selected_option
+    else:
+        answer = UserAnswer(
+            attempt_id=attempt_id,
+            question_id=data.question_id,
+            selected_option=data.selected_option,
+        )
+        db.add(answer)
+
+    db.commit()
+
+    return {"message": "Answer saved"}
+
+
+@exam_router.post("/attempts/{attempt_id}/submit")
+async def submit_exam_attempt(
+    attempt_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    attempt = (
+        db.query(ExamAttempt)
+        .filter(ExamAttempt.id == attempt_id)
+        .first()
+    )
+
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Attempt not found")
+
+    # Ownership check
+    if attempt.student_id != user.id:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+
+    # Prevent double submission
+    if attempt.is_completed:
+        raise HTTPException(status_code=400, detail="Exam already submitted")
+
+    exam = db.query(Exam).filter(Exam.id == attempt.exam_id).first()
+
+    now = datetime.utcnow()
+    elapsed = (now - attempt.start_time).total_seconds() / 60
+
+    # Optional: allow submit even if time exceeded
+    if elapsed > exam.duration_minutes:
+        # You may allow forced submit instead of blocking
+        pass
+
+    # Fetch exam questions
+    exam_questions = (
+        db.query(ExamQuestion)
+        .filter(ExamQuestion.exam_id == exam.id)
+        .all()
+    )
+
+    question_ids = [eq.question_id for eq in exam_questions]
+
+    questions = (
+        db.query(Question)
+        .filter(Question.id.in_(question_ids))
+        .all()
+    )
+
+    question_map = {q.id: q for q in questions}
+
+    # Fetch student answers
+    student_answers = (
+        db.query(UserAnswer )
+        .filter(UserAnswer.attempt_id == attempt_id)
+        .all()
+    )
+
+    answer_map = {a.question_id: a for a in student_answers}
+
+    total_score = 0
+
+    for question_id in question_ids:
+        question = question_map.get(question_id)
+        answer = answer_map.get(question_id)
+
+        if not question:
+            continue
+
+        if answer:
+            if answer.selected_option == question.correct_option:
+                answer.is_correct = True
+                answer.marks_awarded = question.marks
+                total_score += question.marks
+            else:
+                answer.is_correct = False
+                answer.marks_awarded = 0
+        else:
+            # Student didn't answer
+            new_answer = UserAnswer(
+                attempt_id=attempt_id,
+                question_id=question_id,
+                selected_option=None,
+                is_correct=False,
+                marks_awarded=0,
+            )
+            db.add(new_answer)
+
+    attempt.score = total_score
+    attempt.is_completed = True
+    attempt.end_time = now
+
+    db.commit()
+    db.refresh(attempt)
+
+    return {
+        "message": "Exam submitted successfully",
+        "score": total_score,
+        "maximum_marks": exam.maximum_marks,
+        "completed_at": attempt.end_time,
+    }
 
 
 @exam_router.post("/{exam_id}/questions")

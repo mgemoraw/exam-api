@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Literal, Optional, List, Dict
 from uuid import uuid4, UUID
 from enum import Enum
@@ -76,3 +76,26 @@ class MCQCreateRequest(BaseModel):
 
     created_at: Optional[datetime]=datetime.utcnow()
     updated_at: Optional[datetime]=datetime.utcnow()
+
+
+class AnswerSubmitRequest(BaseModel):
+    question_id: UUID
+    selected_option: str
+
+
+class ExamQuestionItem(BaseModel):
+    question_id: UUID
+    order: Optional[int] = Field(None, ge=1)
+    marks_override: Optional[float] = Field(None, ge=0)
+
+
+class AddQuestionsRequest(BaseModel):
+    questions: List[ExamQuestionItem]
+
+    @field_validator("questions")
+    @classmethod
+    def validate_unique_questions(cls, value):
+        ids = [q.question_id for q in value]
+        if len(ids) != len(set(ids)):
+            raise ValueError("Duplicate question IDs are not allowed")
+        return value

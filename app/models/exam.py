@@ -133,6 +133,8 @@ class UserAnswer(Base):
     attempt_question_id: Mapped[str] = Column(String(36), ForeignKey('attempt_question.id'), nullable=True)
     selected_option_id: Mapped[str | None] = Column(String(36), ForeignKey('choices.id'), nullable=True)    
 
+    marks_awarded: Mapped[float] = Column(Float, default=0.0, )
+    is_correct: Mapped[bool] = Column(Boolean, default=False)
 
     # relationships
     attempt: Mapped['ExamAttempt'] = relationship('ExamAttempt', back_populates='user_answers')
