@@ -55,6 +55,7 @@ class Department(Base):
     # Relationship with Module
     modules = relationship("Module", back_populates="department")
     courses = relationship("Course", back_populates="department")
+    questions = relationship("Question", back_populates="department")
 
 class Module(Base):
     __tablename__ = "modules"
@@ -72,6 +73,8 @@ class Module(Base):
     faculty = relationship("Faculty", back_populates="modules")
     # Relationship with Course
     courses = relationship("Course", back_populates="module")
+
+    questions = relationship("Question", back_populates="module")
 
 class Course(Base):
     __tablename__ = "courses"
@@ -96,6 +99,7 @@ class Course(Base):
 
     # Relationship with Student through StudentCourse
     students = relationship("Student", secondary="student_courses", back_populates="courses")
+    questions = relationship("Question", back_populates="course")
 
 
 class StudentCourse(Base):

@@ -19,10 +19,6 @@ exam_router = APIRouter(
 	tags=['Exam'],
 	)
 
-question_router = APIRouter(
-    prefix="/questions",
-    tags=["Questions"],
-)
 
 @exam_router.get("/", response_model=List[ExamResponse])
 async def greetings(user: User = Depends(get_current_user), db:Session=Depends(get_db)):
@@ -84,17 +80,6 @@ async def add_questions_to_exam(
     return {"message": "Questions added successfully"}
 
 
-@question_router.post("/upload")
-async def upload_questions(
-    file: UploadFile,
-    db: Session = Depends(get_db)
-):
-    # parse file
-    # create question objects
-    # save to DB
-    # return list of question IDs
-
-    return None
 
 # POST /exams/{exam_id}/start
 @exam_router.post("/{exam_id}/start")

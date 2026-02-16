@@ -10,7 +10,8 @@ from app.models import Base
 
 from app.api.routes.user import  user_router
 from app.api.routes.auth import auth_router
-from app.api.routes.exam import exam_router, question_router
+from app.api.routes.exam import exam_router
+from app.api.routes.question import question_router
 from app.api.routes.school import school_router
 from app.api.routes.news import news_router
 

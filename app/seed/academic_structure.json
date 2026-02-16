@@ -1,0 +1,283 @@
+{
+  "university": {
+    "name": "Bahir Dar University",
+    "institutes": [
+      {
+        "name": "Bahir Dar Institute of Technology",
+        "faculties": [
+          {
+            "name": "Faculty of Computing",
+            "programes": [
+              {
+                "name": "Software Engineering",
+                "modules": [
+                  {
+                    "title": "Software Design and Architecture",
+                    "courses": [
+                      {
+                        "name": "Introduction to Software Design and Architecture",
+                        "code": "SE201"
+                      },
+                      {
+                        "name": "Advanced Software Design and Architecture",
+                        "code": "SE301"
+                      }
+                    ]
+                  },
+                  {
+                    "title": "Software Testing and Quality Assurance",
+                    "courses": [
+                      {
+                        "name": "Introduction to Software Testing and Quality Assurance",
+                        "code": "SE202"
+                      },
+                      {
+                        "name": "Advanced Software Testing and Quality Assurance",
+                        "code": "SE302"
+                      }
+                    ]
+                  },
+                  {
+                    "title": "Data Structures and Algorithms",
+                    "courses": [
+                      {
+                        "name": "Introduction to Data Structures and Algorithms",
+                        "code": "CSE202"
+                      },
+                      {
+                        "name": "Advanced Data Structures and Algorithms",
+                        "code": "CSE302"
+                      }
+                    ]
+                  },
+                  {
+                    "title": "Operating Systems",
+                    "courses": [
+                      {
+                        "name": "Introduction to Operating Systems",
+                        "code": "CSE203"
+                      },
+                      {
+                        "name": "Advanced Operating Systems",
+                        "code": "CSE303"
+                      }
+                    ]
+                  },
+                  {
+                    "title": "Computer Programming",
+                    "courses": [
+                      {
+                        "name": "Introduction to Computer Programming",
+                        "code": "CSE203"
+                      },
+                      {
+                        "name": "Advanced Computer Programmin g",
+                        "code": "CSE303"
+                      },
+                      {
+                        "name": "Object-Oriented Programming",
+                        "code": "CSE204"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+
+          {
+            "name": "Electrical and Computer Engineering",
+            "modules": [
+              {
+                "title": "Circuit Analysis",
+                "courses": [
+                  {
+                    "name": "Introduction to Circuit Analysis",
+                    "code": "ECE201"
+                  }
+                ]
+              },
+              {
+                "title": "Digital Systems",
+                "courses": [
+                  {
+                    "name": "Introduction to Digital Systems",
+                    "code": "ECE202"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+
+      {
+        "name": "Institute of Land Administration",
+        "faculties": [
+          {
+            "name": "Faculty of Agriculture",
+            "programes": [
+              {
+                "name": "Agricultural Science",
+                "modules": [
+                  {
+                    "title": "Crop Science",
+                    "courses": [
+                      {
+                        "name": "Introduction to Crop Science",
+                        "code": "AG201"
+                      }
+                    ]
+                  },
+                  {
+                    "title": "Soil Science",
+                    "courses": [
+                      {
+                        "name": "Introduction to Soil Science",
+                        "code": "AG202"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "colleges": [
+      {
+        "name": "College of Medicine and Health Sciences",
+        "faculties": [
+          {
+            "name": "Faculty of Medicine",
+            "programes": [
+              {
+                "name": "General Medicine",
+                "modules": [
+                  {
+                    "title": "Anatomy",
+                    "courses": [
+                      {
+                        "name": "Introduction to Anatomy",
+                        "code": "MED201"
+                      }
+                    ]
+                  },
+                  {
+                    "title": "Physiology",
+                    "courses": [
+                      {
+                        "name": "Introduction to Physiology",
+                        "code": "MED202"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "College of Agriculture and Environmental Sciences",
+        "faculties": [
+          {
+            "name": "Faculty of Environmental Science",
+            "programes": [
+              {
+                "name": "Environmental Science",
+                "modules": [
+                  {
+                    "title": "Environmental Chemistry",
+                    "courses": [
+                      {
+                        "name": "Introduction to Environmental Chemistry",
+                        "code": "ENV201"
+                      }
+                    ]
+                  },
+                  {
+                    "title": "Environmental Policy and Management",
+                    "courses": [
+                      {
+                        "name": "Introduction to Environmental Policy and Management",
+                        "code": "ENV202"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "College of Business and Economics",
+        "faculties": [
+          {
+            "name": "Faculty of Business Administration",
+            "programes": [
+              {
+                "name": "Business Administration",
+                "modules": [
+                  {
+                    "title": "Principles of Management",
+                    "courses": [
+                      {
+                        "name": "Introduction to Principles of Management",
+                        "code": "BA201"
+                      }
+                    ]
+                  },
+                  {
+                    "title": "Marketing Management",
+                    "courses": [
+                      {
+                        "name": "Introduction to Marketing Management",
+                        "code": "BA202"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "College of Social Sciences and Humanities",
+        "faculties": [
+          {
+            "name": "Faculty of Sociology",
+            "programes": [
+              {
+                "name": "Sociology",
+                "modules": [
+                  {
+                    "title": "Introduction to Sociology",
+                    "courses": [
+                      {
+                        "name": "Introduction to Sociology",
+                        "code": "SOC201"
+                      }
+                    ]
+                  },
+                  {
+                    "title": "Social Research Methods",
+                    "courses": [
+                      {
+                        "name": "Introduction to Social Research Methods",
+                        "code": "SOC202"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
