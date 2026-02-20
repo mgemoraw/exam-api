@@ -1,0 +1,45 @@
+exam-api/
+│
+├── app/
+│   ├── domain/                  # Pure business logic
+│   │   ├── entities/            # Exam, Question, Option, User
+│   │   ├── value_objects/       # ExamID, QuestionID, Score
+│   │   ├── exceptions/          # ExamNotFound, ValidationError
+│   │   └── repositories/        # Interfaces for DB operations
+│   │
+│   ├── application/             # Use cases / workflows
+│   │   ├── dto/                 # ExamDTO, UserDTO, QuestionDTO
+│   │   ├── interfaces/          # CacheService, EventPublisher
+│   │   └── use_cases/           # CreateExam, SubmitExam, GetExam, ScoreExam
+│   │
+│   ├── infrastructure/          # Framework / external systems
+│   │   ├── database/            # SQLAlchemy async models & session
+│   │   │   ├── base.py          # Base class and engine
+│   │   │   ├── user_model.py
+│   │   │   └── exam_model.py
+│   │   ├── repositories/        # Implements domain repository interfaces
+│   │   ├── cache/               # Redis caching
+│   │   └── messaging/           # Kafka/RabbitMQ publishers/subscribers
+│   │
+│   ├── presentation/            # FastAPI layer (delivery)
+│   │   ├── api/                 # Routers
+│   │   │   ├── auth.py
+│   │   │   ├── user.py
+│   │   │   └── exam.py
+│   │   ├── schemas/             # Pydantic request/response models
+│   │   │   ├── user.py
+│   │   │   └── exam.py
+│   │   └── dependencies.py      # DI for DB, services, cache
+│   │
+│   ├── core/                    # Configs, security, constants
+│   │   ├── config.py            # Pydantic settings
+│   │   ├── security.py          # JWT, password hashing
+│   │   └── logging.py
+│   │
+│   └── main.py                  # FastAPI app startup
+│
+├── tests/                       # Unit + integration tests
+├── migrations/                  # Alembic migrations
+├── Dockerfile
+├── requirements.txt
+└── README.md
