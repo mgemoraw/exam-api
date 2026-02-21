@@ -7,7 +7,7 @@ from sqlalchemy.pool import StaticPool
 
 import app 
 from app.main import app
-from app.core.database import get_db
+from app.infrastructure.database import get_db
 from app.models.base import Base
 from app.models.user import User
 from app.core.security import create_access_token, hash_password

@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta, UTC
 from sqlalchemy.orm import Session
 from redis.asyncio import Redis
-from app.core.database import get_db    
+from app.infrastructure.database import get_db    
 from app.models.user import User
 from app.core.config import settings
 
@@ -237,7 +237,7 @@ async def verify_token(token: str, expected_type: str = "access") -> dict:
                     raise credentials_exception
             else:
                 # Fallback to database check
-                from app.core.database import get_db
+                from app.infrastructure.database import get_db
                 from app.models import RefreshToken
                 db = next(get_db())
                 db_token = db.query(RefreshToken).filter(

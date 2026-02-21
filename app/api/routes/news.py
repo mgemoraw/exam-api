@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.news import News
 from app.schemas.news import NewsCreate, NewsUpdate, NewsResponse
-from app.core.database import get_db
+from app.infrastructure.database import get_db
 
 news_router = APIRouter(
     prefix="/news",

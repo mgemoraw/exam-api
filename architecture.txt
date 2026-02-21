@@ -1,45 +1,136 @@
 exam-api/
 │
 ├── app/
-│   ├── domain/                  # Pure business logic
-│   │   ├── entities/            # Exam, Question, Option, User
-│   │   ├── value_objects/       # ExamID, QuestionID, Score
-│   │   ├── exceptions/          # ExamNotFound, ValidationError
-│   │   └── repositories/        # Interfaces for DB operations
 │   │
-│   ├── application/             # Use cases / workflows
-│   │   ├── dto/                 # ExamDTO, UserDTO, QuestionDTO
-│   │   ├── interfaces/          # CacheService, EventPublisher
-│   │   └── use_cases/           # CreateExam, SubmitExam, GetExam, ScoreExam
+│   ├── modules/                         # Feature-based modules
 │   │
-│   ├── infrastructure/          # Framework / external systems
-│   │   ├── database/            # SQLAlchemy async models & session
-│   │   │   ├── base.py          # Base class and engine
-│   │   │   ├── user_model.py
-│   │   │   └── exam_model.py
-│   │   ├── repositories/        # Implements domain repository interfaces
-│   │   ├── cache/               # Redis caching
-│   │   └── messaging/           # Kafka/RabbitMQ publishers/subscribers
+│   │   ├── exam/
+│   │   │   ├── domain/
+│   │   │   │   ├── entities/
+│   │   │   │   │   ├── exam.py
+│   │   │   │   │   ├── question.py
+│   │   │   │   │   └── option.py
+│   │   │   │   ├── value_objects/
+│   │   │   │   ├── exceptions.py
+│   │   │   │   └── repositories.py
+│   │   │   │
+│   │   │   ├── application/
+│   │   │   │   ├── dto.py
+│   │   │   │   ├── use_cases/
+│   │   │   │   │   ├── create_exam.py
+│   │   │   │   │   ├── submit_exam.py
+│   │   │   │   │   ├── get_exam.py
+│   │   │   │   │   └── score_exam.py
+│   │   │   │   └── interfaces.py
+│   │   │   │
+│   │   │   ├── infrastructure/
+│   │   │   │   ├── models.py              # SQLAlchemy models
+│   │   │   │   ├── repository_impl.py
+│   │   │   │   ├── cache.py               # Redis caching
+│   │   │   │   └── messaging.py           # Kafka publisher
+│   │   │   │
+│   │   │   └── presentation/
+│   │   │       ├── routes.py
+│   │   │       ├── schemas.py
+│   │   │       └── dependencies.py
+│   │   │
+│   │   ├── user/
+│   │   │   ├── domain/
+│   │   │   ├── application/
+│   │   │   ├── infrastructure/
+│   │   │   └── presentation/
+│   │   │
+│   │   └── auth/
+│   │       ├── domain/
+│   │       ├── application/
+│   │       ├── infrastructure/
+│   │       └── presentation/
 │   │
-│   ├── presentation/            # FastAPI layer (delivery)
-│   │   ├── api/                 # Routers
-│   │   │   ├── auth.py
-│   │   │   ├── user.py
-│   │   │   └── exam.py
-│   │   ├── schemas/             # Pydantic request/response models
-│   │   │   ├── user.py
-│   │   │   └── exam.py
-│   │   └── dependencies.py      # DI for DB, services, cache
+│   ├── shared/                           # Shared cross-module components
+│   │   ├── core/
+│   │   │   ├── config.py
+│   │   │   ├── logging.py
+│   │   │   └── constants.py
+│   │   │
+│   │   ├── database/
+│   │   │   ├── base.py
+│   │   │   ├── session.py
+│   │   │   └── migrations/
+│   │   │
+│   │   ├── security/
+│   │   │   ├── jwt.py
+│   │   │   └── password.py
+│   │   │
+│   │   ├── middleware/
+│   │   │   ├── logging_middleware.py
+│   │   │   ├── rate_limit_middleware.py
+│   │   │   └── exception_handler.py
+│   │   │
+│   │   └── cache/
+│   │       └── redis_client.py
 │   │
-│   ├── core/                    # Configs, security, constants
-│   │   ├── config.py            # Pydantic settings
-│   │   ├── security.py          # JWT, password hashing
-│   │   └── logging.py
-│   │
-│   └── main.py                  # FastAPI app startup
+│   └── main.py
 │
-├── tests/                       # Unit + integration tests
-├── migrations/                  # Alembic migrations
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+│
+├── alembic/
 ├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
 └── README.md
+
+
+
+exam-api/
+│
+├── app/
+│   │
+│   ├── modules/
+│   │   │
+│   │   ├── exam/
+│   │   │   ├── models.py          # SQLAlchemy models
+│   │   │   ├── schemas.py         # Pydantic schemas
+│   │   │   ├── repository.py      # DB access layer
+│   │   │   ├── service.py         # Business logic
+│   │   │   ├── events.py          # Kafka producers
+│   │   │   ├── cache.py           # Redis exam caching logic
+│   │   │   └── routes.py          # FastAPI router
+│   │   │
+│   │   ├── user/
+│   │   └── auth/
+│   │
+│   ├── core/
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── redis.py
+│   │   ├── kafka.py
+│   │   ├── security.py
+│   │   └── logging.py
+│   │
+│   ├── middleware/
+│   │   ├── logging.py
+│   │   ├── rate_limit.py
+│   │   └── exception_handler.py
+│   │
+│   └── main.py
+│
+├── tests/
+├── migrations/
+├── docker-compose.yml
+└── Dockerfile
+
+
+Client
+   ↓
+routes.py
+   ↓
+service.py
+   ↓
+repository.py (DB)
+   ↓
+Redis cache (optional)
+   ↓
+Kafka event (submit_exam event)

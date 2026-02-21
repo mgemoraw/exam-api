@@ -1,7 +1,12 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from typing import Generator
 import os 
+
+# ASYNC SQLALCHEMY IMPORTS
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+
+
 
 # user environment variables in production
 DATABASE_URL  = os.getenv('SQLITE_DB_URL', 'sqlite:///./data.db')
@@ -28,3 +33,17 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+
+
+## ASYNC SQLALCHEMY SETUP
+PG_DATABASE_URL = "postgresql+asyncpg://user:pass@localhost/exam_db"
+
+async_engine = create_async_engine(PG_DATABASE_URL, echo=False)
+AsyncSessionLocal = async_sessionmaker(async_engine, expire_on_commit=False)
+
+Base = declarative_base()
+
+async def get_async_db():
+    async with AsyncSessionLocal() as session:
+        yield session

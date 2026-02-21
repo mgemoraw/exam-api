@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, update, delete, insert
 
 
-from app.core.database import get_db
+from app.infrastructure.database import get_db
 from app.schemas.question import QuestionUploadRequest, QuestionResponse, MCQCreateRequest, ContentBlock, ContentType, OptionCreateSchema, OptionResponseSchema
 from app.models.exam import Question, Option
 from app.models.school import Department, Course, Module

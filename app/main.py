@@ -7,8 +7,8 @@ import os
 
 
 # import models # critical import to start creating tables at startup
-from app.core.database import engine
-from app.middlewares import logging_middleware
+from app.infrastructure.database import engine
+from app.middleware import logging_middleware
 from app.models import Base
 
 # from route import router as exam_router
@@ -20,9 +20,9 @@ from app.api.routes.question import question_router
 from app.api.routes.school import school_router
 from app.api.routes.news import news_router
 
-from app.middlewares.auth_middleware import auth_middleware
+from app.middleware.auth_middleware import auth_middleware
 import logging
-from app.middlewares.logging_middleware import configure_logging, LogLevels
+from app.middleware.logging_middleware import configure_logging, LogLevels
 
 # logger setup
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

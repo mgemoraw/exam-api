@@ -11,7 +11,7 @@ from app.models.auth import RefreshToken
 from app.models.user import User 
 from app.schemas.user import UserCreate, UserLogin
 from app.responses.user import  UserResponse, UserTokenResponse
-from app.core.database import get_db, SessionLocal
+from app.infrastructure.database import get_db, SessionLocal
 from app.core.config import settings
 from app.core.security import (
     create_access_token,
