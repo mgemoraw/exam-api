@@ -8,10 +8,8 @@ import os
 
 # import models # critical import to start creating tables at startup
 from app.infrastructure.database import engine
-from app.middleware import logging_middleware
 from app.models import Base
-
-# from route import router as exam_router
+from app.core.logging import setup_logging
 
 from app.api.routes.user import  user_router
 from app.api.routes.auth import auth_router
@@ -21,21 +19,23 @@ from app.api.routes.school import school_router
 from app.api.routes.news import news_router
 
 from app.middleware.auth_middleware import auth_middleware
+from app.middleware.logging_middleware import LoggingMiddleware
 import logging
-from app.middleware.logging_middleware import configure_logging, LogLevels
+
 
 # logger setup
+setup_logging()
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logger = logging.getLogger(__file__)
-configure_logging(LogLevels.info)
+# configure_logging(LogLevels.info)
 
 redis_host = os.getenv("REDIS_HOST", "localhost")
 redis_port = int(os.getenv("REDIS_PORT", 6379))
 redis_db = int(os.getenv("REDIS_DB", 0))
 redis_password = os.getenv("REDIS_PASSWORD", None)
 
-# Redis client setup
+# redis.Redis client setup
 # redis_client = redis.Redis(
 #     host=redis_host,
 #     port=redis_port,
@@ -72,7 +72,8 @@ app = FastAPI(lifespan=lifespan)
 app.middleware("http")(auth_middleware)
 
 # ADD LOGGING MIDDLEWARE
-app.middleware("http")(logging_middleware)
+# app.middleware("http")(LoggingMiddleware)
+app.middleware(LoggingMiddleware)
 
 # @app.on_event("startup")
 # def startup():

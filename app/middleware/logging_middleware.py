@@ -1,5 +1,10 @@
 import logging
 from enum import StrEnum
+from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+import time
+import uuid
+
 
 LOG_FORMAT_DEBUG="%(levelname)s:%(message)s:%(pathname)s:%(funcName)s:%(lineno)d"
 
@@ -10,7 +15,7 @@ class LogLevels(StrEnum):
     debug = "DEBUG"
 
 def configure_logging(log_level: str = LogLevels.error):
-    log_level = str(log_level).upper()  
+    log_level = str(log_level).upper()
     log_levels = [level.value for level in LogLevels]
 
     if log_level not in log_levels:
@@ -22,3 +27,63 @@ def configure_logging(log_level: str = LogLevels.error):
         return 
 
     logging.basicConfig(level=log_level)
+
+
+
+logger = logging.getLogger("exam-api.log")
+
+
+class LoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        request_id = str(uuid.uuid4())
+        start_time = time.time()
+
+        try:
+            response = await call_next(request)
+        except Exception as exc:
+            logger.exception(
+                f"[{request_id}] Error: {request.method} {request.url.path}"
+                )
+            raise exc
+
+        process_time = time.time() - start_time
+        logger.info(
+            f"Request ID: {request_id} | "
+            f"{request.client.host} | "
+            f"{request.method} {request.url.path} | "
+            f"Status: {response.status_code} | "
+            f"{process_time:.4f}s"
+        )
+
+        response.headers["X-Request-ID"] = request_id
+        return response
+
+
+# @app.middleware("http")
+async def app_logging_middleware(request: Request, call_next):
+    request_id = str(uuid.uuid4())
+    start_time = time.time()
+
+    try:
+        response = await call_next(request)
+
+    except Exception as exc:
+        logger.exception(
+            f"Request ID: {request_id} | "
+            f"Error processing request {request.method} {request.url.path}"
+        )
+        raise exc
+
+    process_time = time.time() - start_time
+
+    logger.info(
+        f"Request ID: {request_id} | "
+        f"{request.client.host} | "
+        f"{request.method} {request.url.path} | "
+        f"Status: {response.status_code} | "
+        f"{process_time:.4f}s"
+    )
+
+    response.headers["X-Request-ID"] = request_id
+
+    return response
