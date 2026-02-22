@@ -1,4 +1,5 @@
-#!bin/bash
+
+#!/usr/bin/bash
 
 #add all files
 git add .
