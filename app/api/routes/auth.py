@@ -26,7 +26,7 @@ from app.api.deps.user import get_user, get_current_user
 
 auth_router = APIRouter(
 	prefix="/auth",
-	tags=['Authentication']
+	tags=['Authentication'],
 	)
 
 
