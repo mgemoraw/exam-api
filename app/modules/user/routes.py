@@ -7,7 +7,10 @@ from app.modules.user.repository import UserRepository
 from app.modules.user.services import UserService
 from app.modules.user.schemas import UserCreate
 
-router = APIRouter(prefix="/users")
+router = APIRouter(
+    prefix="/user",
+    tags=["User"],
+    )
 
 
 def get_user_service(db: Session = Depends(get_db)):
@@ -24,3 +27,5 @@ def create_user(
         return service.create_user(user.dict())
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+

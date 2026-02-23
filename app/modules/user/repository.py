@@ -1,6 +1,7 @@
 # app/modules/user/repository.py
 
-from app.modules.user.models import User
+# from app.modules.user.models import User
+from app.models.user import User
 
 class UserRepository:
     def __init__(self, db):
