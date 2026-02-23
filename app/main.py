@@ -17,11 +17,14 @@ from app.api.routes.exam import exam_router
 from app.api.routes.question import question_router
 from app.api.routes.school import school_router
 from app.api.routes.news import news_router
+from app.modules.user.routes import router
 
 from app.middleware.auth_middleware import auth_middleware
 from app.middleware.logging_middleware import LoggingMiddleware
 import logging
 
+
+PRODUCTION = False # make it True for production
 
 # logger setup
 setup_logging()
@@ -67,7 +70,12 @@ async def lifespan(app: FastAPI):
 
 
 # creating app
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    docs_url=None if PRODUCTION else "/docs",
+    redoc_url=None if PRODUCTION else "/redoc",
+    openapi_url=None if PRODUCTION else "/openapi.json",
+    lifespan=lifespan
+    )
 
 app.middleware("http")(auth_middleware)
 
@@ -109,6 +117,7 @@ app.include_router(exam_router)
 app.include_router(question_router)
 app.include_router(school_router)
 app.include_router(news_router)
+app.include_router(router)
 
 
 if __name__=="__main__":

@@ -1,14 +1,27 @@
-from pydantic import BaseModel, Field, EmailStr
+from decimal import Decimal
+
+from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from typing import Optional
 
+from pydantic.alias_generators import to_camel  
+from datetime import datetime
+from app.modules.app_base_model import AppBaseModel
+from uuid import UUID
 
-class UserBase(BaseModel):
+class UserBase(AppBaseModel):
     email: EmailStr
-    
 
-class UserCreate(UserBase):
-    username: str = Field(..., min_length=3, max_length=50)
-    password: str = Field(..., min_length=6)
+    
+class UserCreate(AppBaseModel):
+	id: UUID | str
+	username: str = Field(..., min_length=3, max_length=50)
+	email: Optional[EmailStr]
+	is_superuser: Optional[bool] = False
+	password: str = Field(..., min_length=6)
+
+# class UserCreate(UserBase):
+#     username: str = Field(..., min_length=3, max_length=50)
+#     password: str = Field(..., min_length=6)
 
 class UserRead(UserBase):
     id: str
