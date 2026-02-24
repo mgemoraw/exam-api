@@ -11,12 +11,15 @@ from .user import (
 
 from .exam import (
 	Exam, 
-	Question,
-	Option,
 	ExamAttempt, 
 	AttemptQuestion, 
 	UserAnswer,
 	)
+from .question import (
+    Question,
+	Option,
+)
+
 from.auth import RefreshToken
 from .school import Course, StudentCourse, Department, Faculty, Module, University
 from .address import Address

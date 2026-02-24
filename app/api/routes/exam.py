@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
 from app.models.user import User
-from app.models.exam import Exam, ExamQuestion, Question, Option, UserAnswer, ExamAttempt
-
+from app.models.exam import Exam, ExamQuestion, UserAnswer, ExamAttempt
+from app.models.question import Question, Option
 from app.infrastructure.database import get_db
 from app.api.deps.user import get_user, get_current_user
 from app.schemas.exam import AddQuestionsRequest, ExamCreateRequest, ExamResponse, AnswerSubmitRequest

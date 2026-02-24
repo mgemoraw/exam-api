@@ -5,9 +5,9 @@ from sqlalchemy import select, update, delete, insert
 
 
 from app.infrastructure.database import get_db
-from app.schemas.question import QuestionUploadRequest, QuestionResponse, MCQCreateRequest, ContentBlock, ContentType, OptionCreateSchema, OptionResponseSchema
-from app.models.question import Question, Option
-from app.models.school import Department, Course, Module
+from .schemas import QuestionUploadRequest, QuestionResponse, MCQCreateRequest, ContentBlock, ContentType, OptionCreateSchema, OptionResponseSchema
+from .models import Question, Option
+from ..school.models import Department, Course, Module
 import json
 from uuid import uuid4
 
