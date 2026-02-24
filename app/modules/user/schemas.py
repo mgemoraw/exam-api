@@ -37,6 +37,10 @@ class UserUpdate(BaseModel):
     password: Optional[str] = Field(None, min_length=6)
     is_active: Optional[bool] = None
     is_superuser: Optional[bool] = None
+    email: EmailStr
+
+class UpdatePasswordRequest(BaseModel):
+    password: Optional[str] = Field(None, min_length=6)
 
 class RoleBase(BaseModel):
     name: str = Field(..., min_length=3, max_length=50)

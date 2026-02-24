@@ -7,6 +7,7 @@ import uuid
 
 
 LOG_FORMAT_DEBUG="%(levelname)s:%(message)s:%(pathname)s:%(funcName)s:%(lineno)d"
+logger = logging.getLogger("exam-api.log")
 
 class LogLevels(StrEnum):
     info = "INFO"
@@ -28,9 +29,6 @@ def configure_logging(log_level: str = LogLevels.error):
 
     logging.basicConfig(level=log_level)
 
-
-
-logger = logging.getLogger("exam-api.log")
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):

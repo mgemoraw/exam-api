@@ -51,7 +51,7 @@ async def create_user(user:UserCreate, db:Session = Depends(get_db)):
 			status_code=400,
 			detail="Username or email already exists"
 			)
-
+ 
 	# Check the password strength of new user password
 	if not is_password_strong(user.password):
 		raise HTTPException(

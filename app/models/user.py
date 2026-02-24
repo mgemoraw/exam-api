@@ -258,10 +258,11 @@ class Student(Base):
 
     # relationships
     user: Mapped['User'] = relationship('User', back_populates='student_profile', foreign_keys=[user_id],)
+    student_courses: Mapped[List['StudentCourse']] = relationship('StudentCourse', back_populates='student', cascade="all, delete-orphan")
     
     courses: Mapped[List['Course']] = relationship('Course', secondary="student_courses", back_populates='students')
     
-    student_courses: Mapped[List['StudentCourse']] = relationship('StudentCourse', back_populates='student', cascade="all, delete-orphan")
+    
 
     def __repr__(self):
         return f"<Student enrollment_number={self.enrollment_number}>"

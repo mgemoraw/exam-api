@@ -5,6 +5,7 @@ import os
 LOG_DIR = "logs"
 LOG_FILE = "logs/app.log"
 
+
 def setup_logging():
 
     # Create logs directory if it doesn't exist
@@ -34,3 +35,8 @@ def setup_logging():
     # Attach handlers
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
+
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+logger = logging.getLogger(__file__)
