@@ -1,9 +1,13 @@
+from typing import List
+
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func, TEXT
 from sqlalchemy.orm import relationship, Mapped,mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from app.infrastructure.database import Base
 from ..address.models import Address
+from ..question.models import Question 
+# from ..user.models import Student
 
 class University(Base):
     __tablename__ = "universities"
@@ -37,8 +41,10 @@ class Faculty(Base):
 
     # Relationship with Department
     departments = relationship("Department", back_populates="faculty")
-    # Relationship with Module
-    modules = relationship("Module", back_populates="faculty")
+    programes = relationship("Program", back_populates="faculty")
+    
+    # # Relationship with Module
+    # modules = relationship("Module", back_populates="faculty")
 
 
 class Department(Base):
@@ -46,6 +52,7 @@ class Department(Base):
 
     id :Mapped[str] = mapped_column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(255), nullable=False)
+    years_of_study = Column(Integer, nullable=False)
     faculty_id = Column(String(36), ForeignKey("faculties.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -57,12 +64,29 @@ class Department(Base):
     courses = relationship("Course", back_populates="department")
     questions = relationship("Question", back_populates="department")
 
+class Program(Base):
+    __tablename__ = 'programes'
+    id :Mapped[str] = mapped_column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String(255), nullable=False)
+    years_of_study = Column(Integer, nullable=False)
+    faculty_id = Column(String(36), ForeignKey("faculties.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    faculty = relationship("Faculty", back_populates="programes")
+    # modules = relationship("Module", back_populates="programes")
+    courses = relationship("Course", back_populates="program")
+    questions = relationship("Question", back_populates="program", foreign_keys='Question.program_id')
+
+    students: Mapped[List['Student']] = relationship('Student', back_populates='program', cascade='delete-orphan')
+
 class Module(Base):
     __tablename__ = "modules"
 
     id :Mapped[str] = mapped_column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     department_id = Column(String(36), ForeignKey("departments.id"), nullable=False)
-    faculty_id = Column(String(36), ForeignKey("faculties.id"), nullable=False)
+    # program_id = Column(String(36), ForeignKey("programes.id"), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(TEXT, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -70,7 +94,7 @@ class Module(Base):
 
     # Relationship with Department
     department = relationship("Department", back_populates="modules")
-    faculty = relationship("Faculty", back_populates="modules")
+    # program = relationship("Program", back_populates="modules")
     # Relationship with Course
     courses = relationship("Course", back_populates="module")
 
@@ -86,11 +110,14 @@ class Course(Base):
     
     module_id = Column(String(36), ForeignKey("modules.id"), nullable=False)
     department_id = Column(String(36), ForeignKey("departments.id"), nullable=False)
+    program_id = Column(String(36), ForeignKey("programes.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationship with Department
     department = relationship("Department", back_populates="courses")
+    program = relationship("Program", back_populates="courses")
+
     # Relationship with Module
     module = relationship("Module", back_populates="courses")
     # Relationship with StudentCourse

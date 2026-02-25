@@ -12,6 +12,8 @@ from app.models.user import User
 from app.core.config import settings
 
 import uuid 
+import re
+
 
 SECRET_KEY = "NKPD9W4hV/+YStZ+RejELM68Dw5okI5TrYrNWRcIf8q/OGfvxQXvtEirGA4yp9syAQkf3CWFqzH/nrV844dj8Q=="
 ALGORITHM = "HS256"
@@ -280,7 +282,29 @@ def is_password_strong(password:str):
         return False
     
     return True
+
+
+def validate_password(password: str) -> bool:
+    """
+    Validates password strength:
+    - Min 10 characters
+    - At least one uppercase & lowercase letter
+    - At least one digit
+    - At least one special character
+    """
+    # Regex Breakdown:
+    # (?=.*[a-z]) : Must contain at least one lowercase letter
+    # (?=.*[A-Z]) : Must contain at least one uppercase letter
+    # (?=.*\d)    : Must contain at least one digit
+    # (?=.*[\W_]) : Must contain at least one special character (non-word char)
+    # .{10,}      : Must be at least 10 characters long
     
+    schema = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{10,}$"
+    
+    if re.match(schema, password):
+        return True
+    return False
+
     
 def hash_password(password: str) -> str:
     # Implement a proper password hashing mechanism here

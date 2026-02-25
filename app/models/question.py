@@ -23,19 +23,21 @@ class Question(Base):
     marks: Mapped[int] = Column(Integer, default=1)
 
     department_id: Mapped[str] = Column(String(36), ForeignKey('departments.id'), nullable=True)
+    program_id: Mapped[str] = Column(String(36), ForeignKey('programes.id'), nullable=True)
     course_id: Mapped[str] = Column(String(36), ForeignKey('courses.id'), nullable=True)
     module_id: Mapped[str] = Column(String(36), ForeignKey('modules.id'), nullable=True)
 
     # relationships
     options: Mapped[List['Option']] = relationship('Option', back_populates='question', cascade="all, delete",
     passive_deletes=True)
-
+    
     exam_questions: Mapped[List["ExamQuestion"]] = relationship("ExamQuestion", back_populates="question", cascade="all, delete-orphan")
     attempt_questions :Mapped['AttemptQuestion'] = relationship('AttemptQuestion', back_populates='question')
     user_answers: Mapped['UserAnswer']=relationship('UserAnswer', back_populates='question', cascade='all, delete-orphan')
 
     # optional relationships to categorize question
     department: Mapped[Optional['Department']] = relationship('Department', back_populates='questions', foreign_keys=[department_id])
+    program: Mapped[Optional['Program']] = relationship('Program', back_populates='questions', foreign_keys=[program_id])
     course: Mapped[Optional['Course']] = relationship('Course', back_populates='questions', foreign_keys=[course_id])
     module: Mapped[Optional['Module']] = relationship('Module', back_populates='questions', foreign_keys=[module_id])
 

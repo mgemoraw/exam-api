@@ -1,5 +1,5 @@
 # models/user.py
-from sqlalchemy import ForeignKey, String, Boolean, Column, DateTime, UniqueConstraint, func 
+from sqlalchemy import ForeignKey, Integer, String, Boolean, Column, DateTime, UniqueConstraint, func 
 from sqlalchemy import Enum as SQLEnum
 
 from sqlalchemy.orm import Mapped, mapped_column
@@ -18,146 +18,6 @@ from ..news.models import News
 from app.infrastructure.database import Base
 from datetime import datetime
 from enum import Enum
-
-
-class RoleName(str, Enum):
-    ADMIN = "admin"
-    QA_DIRECTOR="qa_director"
-    DEAN="dean"
-    APO='apo'
-    QA_OFFICER="qa_officer"
-    CHAIR_HOLDER="chair_holder"
-    COURSE_CHAIR="course_chair"
-    EDITOR = "editor"
-    STUDENT = "student"
-    
-
-class PermissionName(str, Enum):
-    CREATE_EXAM = "create_exam"
-    ASSIGN_ROLE = "assign_role"
-    VIEW_RESULT = "view_result"
-    GENERATE_REPORT = "generate_report"
-    CREATE_ANNOUNCEMENT='create_announcement'
-
-
-class Role(Base):
-    __tablename__ = "roles"
-
-    id: Mapped[str] = mapped_column(
-        String(36),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        unique=True,
-        nullable=False,
-    )
-    name: Mapped[RoleName] = mapped_column(SQLEnum(RoleName, name="role_name_enum", native_enum=False), unique=True, nullable=False)
-    description: Mapped[str] = mapped_column(String(255), nullable=False)
-
-    # relationships
-    user_roles: Mapped[List['UserRole']] = relationship('UserRole', back_populates='role', cascade='all, delete-orphan')
-    user_role_permissions: Mapped[List['RolePermission']] = relationship('RolePermission', back_populates='role', cascade='all, delete-orphan')
-
-    def __repr__(self):
-        return f"<Role name={self.name}>"
-
-
-
-class UserRole(Base):
-    __tablename__ = 'user_roles'
-    __table_args__ = (UniqueConstraint("user_id", "role_id", name="uq_user_role"),)
-
-    id: Mapped[str] = mapped_column(
-        String(36),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        unique=True,
-        nullable=False,
-    )
-    user_id: Mapped[str] = mapped_column(
-        String(36),
-        ForeignKey("users.id"),
-        nullable=False,
-    )
-    role_id: Mapped[str] = mapped_column(
-        String(36),
-        ForeignKey('roles.id'),
-        nullable=False
-    )
-    assigned_by: Mapped[str]  = mapped_column(
-        String(36),
-        ForeignKey("users.id"),
-        nullable=False, 
-    )
-    assigned_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow(),
-    )
-
-    # relationships
-    user: Mapped['User'] = relationship('User', back_populates='user_roles', foreign_keys=[user_id])
-    assigner: Mapped['User'] = relationship('User', back_populates='assigned_roles', foreign_keys=[assigned_by])
-    role: Mapped['Role'] = relationship('Role', back_populates='user_roles')
-
-    def __repr__(self):
-        return f"<UserRole user_id={self.user_id} role_id={self.role_id} assigned_by={self.assigned_by}>"
-
-    
-
-class Permission(Base):
-    __tablename__ = 'permissions'
-    id: Mapped[str] = mapped_column(
-        String(36),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        unique=True,
-        nullable=False,
-    )
-    name: Mapped[PermissionName] = mapped_column(
-        SQLEnum(PermissionName, name="permission_name_enum", native_enum=False), 
-        unique=True,
-        nullable=False,
-    )
-    description: Mapped[str] = mapped_column(
-        String(255), 
-        nullable=False,
-    )
-
-    # relationships
-    user_role_permissions: Mapped[List['RolePermission']] = relationship('RolePermission', back_populates='permission', cascade="all, delete-orphan", foreign_keys="RolePermission.permission_id")
-
-    def __repr__(self):
-        return f"<Permission name={self.name}>"
-
-
-
-class RolePermission(Base):
-    __tablename__ = 'role_permissions'
-    __table_args__ = (UniqueConstraint("role_id", "permission_id", name="uq_role_permission"),)
-
-    id: Mapped[str] = mapped_column(
-        String(36),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        unique=True,
-        nullable=False,
-    )
-    role_id: Mapped[str] = mapped_column(
-        String(36),
-        ForeignKey('roles.id'),
-        nullable=False
-    )
-    permission_id: Mapped[str] = mapped_column(
-        String(36),
-        ForeignKey('permissions.id'),
-        nullable=False
-    )
-
-    
-    # relationships
-    permission: Mapped['Permission'] = relationship('Permission', back_populates='user_role_permissions', foreign_keys=[permission_id])
-    role: Mapped['Role'] = relationship('Role', back_populates='user_role_permissions', foreign_keys=[role_id])
-
-    def __repr__(self):
-        return f"<RolePermission role_id={self.role_id} permission_id={self.permission_id}>"
 
 
 class User(Base):
@@ -256,17 +116,64 @@ class Student(Base):
         nullable=False
     )
     enrollment_number: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    
+    program_id: Mapped[str] = mapped_column(String(36), ForeignKey('programes.id'))
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
 
     # relationships
     user: Mapped['User'] = relationship('User', back_populates='student_profile', foreign_keys=[user_id],)
+    program: Mapped['Program'] = relationship('Program', back_populates='students', foreign_keys=[program_id])
     
     courses: Mapped[List['Course']] = relationship('Course', secondary="student_courses", back_populates='students')
     
     student_courses: Mapped[List['StudentCourse']] = relationship('StudentCourse', back_populates='student', cascade="all, delete-orphan")
 
+    profile: Mapped[Optional['StudentProfile']] = relationship('StudentProfile', back_populates='student')
+
+
     def __repr__(self):
         return f"<Student enrollment_number={self.enrollment_number}>"
     
+
+class StudentProfile(Base):
+    __tablename__ = "student_profiles"
+
+    id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4()),
+        unique=True,
+        nullable=False,
+    )
+    student_id: Mapped[str] = mapped_column(
+        String(50),
+        ForeignKey('students.enrollment_number'),
+        nullable=False,
+    )
+    fname: Mapped[str] = mapped_column(
+        String(100)
+    )
+    mname: Mapped[str] = mapped_column(
+        String(100)
+    )
+    lname: Mapped[str] = mapped_column(
+        String(100)
+    )
+    
+    dob: Mapped[str] = mapped_column(String(10), nullable=True)
+    phone_number: Mapped[str] = mapped_column(String(15), nullable=True)
+    address: Mapped[str] = mapped_column(String(255), nullable=True)
+    enrolled_year:Mapped[int] = mapped_column(Integer, nullable=False)
+    graduation_year:Mapped[int] =mapped_column(Integer, nullable=False)
+
+    student = relationship('Student', back_populates='profile')
+    
+
+    @property
+    def full_name(self) -> str:
+        return f"{self.fname} {self.mname} {self.lname}"
+
+
+    @property
+    def graduation_year(self, program_year):
+        return self.enrolled_year + program_year 

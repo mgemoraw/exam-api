@@ -3,6 +3,41 @@
 from app.models.address import Address
 from app.models.school import University
 
+class Address:
+    def __init__(self, street, city, state, zip_code, country):
+        self. street = street 
+        self.city = city
+        self.state = state
+        self.zip_code = zip_code
+        self.country = country
+
+    def format(self):
+        """Format an address into a single string."""
+        return f"{self.street}, {self.city}, {self.state} {self.zip_code}"
+    
+    @classmethod
+    def validate_zip_code(zip_code):
+        """Validate the given zip code."""
+        if len(zip_code) != 5 or not zip_code.isdigit():
+            raise ValueError("Invalid zip code format")
+        return True
+
+    def __repr__(self):
+        """Get a summary of the address."""
+        return f"{self.street}, {self.city}, {self.state}, {self.zip_code}, {self.country}"
+
+    def create(self, address_data):
+        """Create an address in the database and return it."""
+
+        new_address = Address(
+            street=address_data.street,
+            city=address_data.city,
+            state=address_data.state,
+            zip_code=address_data.zip_code,
+            country=address_data.country
+        )
+      
+        return new_address
 
 def format_address(street, city, state, zip_code):
     """Format an address into a single string."""

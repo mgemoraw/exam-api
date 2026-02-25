@@ -1,7 +1,7 @@
 # app/modules/user/repository.py
 
 # from app.modules.user.models import User
-from app.models.user import User
+from .models import User
 
 class UserRepository:
     def __init__(self, db):
@@ -30,3 +30,4 @@ class UserRepository:
     def delete(self, user: User):
         self.db.delete(user)
         self.db.commit()
+        return user

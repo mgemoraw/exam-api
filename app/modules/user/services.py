@@ -1,6 +1,6 @@
 # app/modules/user/service.py
 
-from app.core.security import hash_password, is_password_strong
+from app.core.security import hash_password, is_password_strong, validate_password
 from app.core.logging import logger 
 from .repository import UserRepository
 from .models import User
@@ -15,7 +15,7 @@ class UserService:
         if existing:
             raise ValueError("Email already registered")
         
-        if not is_password_strong(data.password):
+        if not validate_password(data.password):
             raise ValueError("Password is not Strong. Password should conain at least one Caps Lock letter, one small letter, one digit and one symbol.")
 
         user = User(
@@ -51,7 +51,7 @@ class UserService:
         if not user:
             raise ValueError("User not found")
         
-        if not is_password_strong(new_password):
+        if not validate_password(new_password):
             raise ValueError("Password is not Strong. Password should conain at least one Caps Lock letter, one small letter, one digit and one symbol.")
 
         user.hashed_password = hash_password(new_password)

@@ -9,7 +9,7 @@ from datetime import datetime
 from enum import Enum
 
 from app.infrastructure.database import Base
-from ..school.models import Department
+# from ..school.models import Department
 
 
 
@@ -23,6 +23,8 @@ class Question(Base):
     marks: Mapped[int] = Column(Integer, default=1)
 
     department_id: Mapped[str] = Column(String(36), ForeignKey('departments.id'), nullable=True)
+    program_id: Mapped[str] = Column(String(36), ForeignKey('programes.id'), nullable=True)
+    
     course_id: Mapped[str] = Column(String(36), ForeignKey('courses.id'), nullable=True)
     module_id: Mapped[str] = Column(String(36), ForeignKey('modules.id'), nullable=True)
 
@@ -36,6 +38,8 @@ class Question(Base):
 
     # optional relationships to categorize question
     department: Mapped[Optional['Department']] = relationship('Department', back_populates='questions', foreign_keys=[department_id])
+
+    program: Mapped[Optional['Program']] = relationship('Program', back_populates='questions', foreign_keys=[program_id])
     course: Mapped[Optional['Course']] = relationship('Course', back_populates='questions', foreign_keys=[course_id])
     module: Mapped[Optional['Module']] = relationship('Module', back_populates='questions', foreign_keys=[module_id])
 

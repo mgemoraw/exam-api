@@ -8,7 +8,8 @@ import os
 
 # import models # critical import to start creating tables at startup
 from app.infrastructure.database import engine
-from app.models import Base
+# from app.models import Base
+from app.infrastructure.database import Base 
 from app.core.logging import setup_logging
 
 from app.api.routes.user import  user_router
