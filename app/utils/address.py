@@ -1,9 +1,9 @@
 """Utilities for handling addresses."""
 
-from app.models.address import Address
-from app.models.school import University
+from app.modules.address.models import Address
 
-class Address:
+
+class AddressService:
     def __init__(self, street, city, state, zip_code, country):
         self. street = street 
         self.city = city

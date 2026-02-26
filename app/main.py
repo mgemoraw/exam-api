@@ -10,7 +10,8 @@ import os
 from app.infrastructure.database import engine
 # from app.models import Base
 from app.infrastructure.base import Base 
-from app.core.logging import setup_logging
+from app.core.logger import setup_logging, logger
+
 
 # from app.api.routes.user import  user_router
 # from app.api.routes.auth import auth_router
@@ -22,22 +23,15 @@ from app.core.logging import setup_logging
 
 from app.api.v1.router import v1_router
 
-
-
-
 from app.middleware.auth_middleware import auth_middleware
-from app.middleware.logging_middleware import LoggingMiddleware
-import logging
+from app.middleware.logging_middleware import LoggingMiddleware, app_logging_middleware
+
 
 
 PRODUCTION = False # make it True for production
 
 # logger setup
 setup_logging()
-# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-logger = logging.getLogger(__file__)
-# configure_logging(LogLevels.info)
 
 redis_host = os.getenv("REDIS_HOST", "localhost")
 redis_port = int(os.getenv("REDIS_PORT", 6379))
@@ -88,8 +82,8 @@ app = FastAPI(
 app.middleware("http")(auth_middleware)
 
 # ADD LOGGING MIDDLEWARE
-# app.middleware("http")(LoggingMiddleware)
-app.middleware(LoggingMiddleware)
+app.middleware("http")(app_logging_middleware)
+# app.middleware(LoggingMiddleware())
 
 # @app.on_event("startup")
 # def startup():
@@ -99,13 +93,13 @@ app.middleware(LoggingMiddleware)
 @app.get("/")
 async def root():
     payload = {"message": "Welcome to the Exam API"}
-    logger.info("Root endpoint accessed")
+    
     return payload
 
 @app.get("/health")
 async def health_check():
     payload = {"status": "healthy"}
-    logger.info("Health check endpoint accessed")
+    
     return payload
 
 @app.get("/redis-test")
@@ -126,6 +120,8 @@ async def redis_test():
 # app.include_router(school_router)
 # app.include_router(news_router)
 # app.include_router(router)
+
+
 app.include_router(v1_router, prefix="/api")
 
 

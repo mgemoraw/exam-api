@@ -9,7 +9,7 @@ from datetime import datetime
 from enum import Enum
 
 from .base import Base
-from .school import Department
+# from .school import Department
 
 
 

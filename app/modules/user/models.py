@@ -1,5 +1,6 @@
 # models/user.py
 from sqlalchemy import ForeignKey, Integer, String, Boolean, Column, DateTime, UniqueConstraint, func 
+from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 from sqlalchemy import Enum as SQLEnum
 
 from sqlalchemy.orm import Mapped, mapped_column
@@ -123,9 +124,15 @@ class Student(Base):
     user: Mapped['User'] = relationship('User', back_populates='student_profile', foreign_keys=[user_id],)
     program: Mapped['Program'] = relationship('Program', back_populates='students', foreign_keys=[program_id])
     
-    courses: Mapped[List['Course']] = relationship('Course', secondary="student_courses", back_populates='students')
+    # courses: Mapped[List['Course']] = relationship('Course', secondary="student_courses", back_populates='students')
+    # Shortcut to get courses directly
+    courses: AssociationProxy[List["Course"]] = association_proxy(
+        "student_courses", "course", 
+        creator=lambda c: StudentCourse(course=c)
+    )
     
     student_courses: Mapped[List['StudentCourse']] = relationship('StudentCourse', back_populates='student', cascade="all, delete-orphan")
+    
 
     profile: Mapped[Optional['StudentProfile']] = relationship('StudentProfile', back_populates='student')
 

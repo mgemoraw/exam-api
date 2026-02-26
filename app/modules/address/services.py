@@ -40,5 +40,9 @@ class AddressService:
         return self.repo.create(new_address)
     
 
+    def get_addresses(self):
+        return self.repo.read()
+    
+
     
    

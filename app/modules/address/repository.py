@@ -9,6 +9,9 @@ class AddressRepository:
     def get_by_id(self, id:str):
         return self.db.query(Address).filter(Address.id==id).first()
     
+    def read(self):
+        return self.db.query(Address).all()
+    
     def get_address(self, address_data):
         """Queries existing address its ID."""
         address = self.db.query(Address).filter_by(
@@ -36,7 +39,8 @@ class AddressRepository:
         self.db.refresh(address)
         return address
     
-    def delete(self, address: Address):
+    def delete(self, address_id: str) -> Address:
+        address = self.db.query(Address).filter(Address.id==address_id).first()
         self.db.delete(address)
         self.db.commit()
         return address 

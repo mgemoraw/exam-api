@@ -4,7 +4,9 @@ from jose import jwt, JWTError
 from uuid import UUID
 
 from app.infrastructure.database import get_db
-from app.core.security import oauth2_scheme, SECRET_KEY, ALGORITHM
+from app.core.config import settings
+from app.core.security import oauth2_scheme
+
 from app.modules.user.models import User
 
 
@@ -22,7 +24,7 @@ def get_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db))
 
     try:
         # token = tokens.get("access_token")
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id: str | None = payload.get("sub")
 
         if user_id is None:
@@ -47,7 +49,7 @@ def get_current_user(token: str=Depends(oauth2_scheme), db:Session=Depends(get_d
     
     try:
         # token = tokens.get("access_token")
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id: str | None = payload.get("sub")
 
         if user_id is None:

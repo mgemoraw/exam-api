@@ -1,7 +1,6 @@
 # app/modules/user/service.py
 
 from app.core.security import hash_password, is_password_strong, validate_password
-from app.core.logging import logger 
 from .repository import UserRepository
 from .models import User
 

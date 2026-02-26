@@ -3,10 +3,11 @@ from typing import List
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func, TEXT
 from sqlalchemy.orm import relationship, Mapped,mapped_column
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 import uuid
 from app.infrastructure.base import Base
-from ..address.models import Address
-from ..question.models import Question 
+# from ..address.models import Address
+# from ..question.models import Question 
 # from ..user.models import Student
 
 class University(Base):
@@ -122,11 +123,17 @@ class Course(Base):
     module = relationship("Module", back_populates="courses")
     # Relationship with StudentCourse
 
-    student_courses = relationship("StudentCourse", back_populates="course")
+    student_courses = relationship("StudentCourse", back_populates="course", cascade="all, delete-orphan")
 
     # Relationship with Student through StudentCourse
-    students = relationship("Student", secondary="student_courses", back_populates="courses")
     questions = relationship("Question", back_populates="course")
+
+    # 2. The Proxy: This allows you to do `course.students` 
+    # It fetches the 'student' attribute from every 'StudentCourse' object.
+    students: AssociationProxy[List["Student"]] = association_proxy(
+        "student_courses", "student", 
+        creator=lambda s: StudentCourse(student=s)
+    )
 
 
 class StudentCourse(Base):

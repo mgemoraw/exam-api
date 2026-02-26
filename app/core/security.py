@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, UTC
 from sqlalchemy.orm import Session
 from redis.asyncio import Redis
 from app.infrastructure.database import get_db    
-from app.models.user import User
+from app.modules.user.models import User
 from app.core.config import settings
 
 import uuid 
@@ -146,7 +146,7 @@ async def create_refresh_token(user_id: str, db) -> Dict[str, Any]:
     )
     
     # Store refresh token in database (for invalidation)
-    from app.models import RefreshToken
+    from app.modules.auth.models import RefreshToken
 
     # if refresh token for user already exists, update it
     existing_token = db.query(RefreshToken).filter_by(user_id=str(user_id)).first()
@@ -240,7 +240,7 @@ async def verify_token(token: str, expected_type: str = "access") -> dict:
             else:
                 # Fallback to database check
                 from app.infrastructure.database import get_db
-                from app.models import RefreshToken
+                from app.modules.auth.models import RefreshToken
                 db = next(get_db())
                 db_token = db.query(RefreshToken).filter(
                     RefreshToken.jti == jti,
@@ -261,7 +261,7 @@ async def revoke_refresh_token(jti: str, db):
         await redis_client.delete(f"refresh_token:{jti}")
     
     # Mark as revoked in database
-    from app.models import RefreshToken
+    from app.modules.auth.models import RefreshToken
     db_token = db.query(RefreshToken).filter(RefreshToken.jti == jti).first()
     if db_token:
         db_token.is_revoked = True

@@ -5,6 +5,9 @@ import os
 LOG_DIR = "logs"
 LOG_FILE = "logs/app.log"
 
+logger = logging.getLogger(__file__)
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def setup_logging():
 
@@ -37,6 +40,4 @@ def setup_logging():
     logger.addHandler(file_handler)
 
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-logger = logging.getLogger(__file__)
