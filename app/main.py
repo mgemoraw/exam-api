@@ -9,16 +9,21 @@ import os
 # import models # critical import to start creating tables at startup
 from app.infrastructure.database import engine
 # from app.models import Base
-from app.infrastructure.database import Base 
+from app.infrastructure.base import Base 
 from app.core.logging import setup_logging
 
-from app.api.routes.user import  user_router
-from app.api.routes.auth import auth_router
-from app.api.routes.exam import exam_router
-from app.api.routes.question import question_router
-from app.api.routes.school import school_router
-from app.api.routes.news import news_router
-from app.modules.user.routes import router
+# from app.api.routes.user import  user_router
+# from app.api.routes.auth import auth_router
+# from app.api.routes.exam import exam_router
+# from app.api.routes.question import question_router
+# from app.api.routes.school import school_router
+# from app.api.routes.news import news_router
+# from app.modules.user.routes import router
+
+from app.api.v1.router import v1_router
+
+
+
 
 from app.middleware.auth_middleware import auth_middleware
 from app.middleware.logging_middleware import LoggingMiddleware
@@ -75,7 +80,9 @@ app = FastAPI(
     docs_url=None if PRODUCTION else "/docs",
     redoc_url=None if PRODUCTION else "/redoc",
     openapi_url=None if PRODUCTION else "/openapi.json",
-    lifespan=lifespan
+    lifespan=lifespan,
+    title="Exam API",
+    version="1.2.0",
     )
 
 app.middleware("http")(auth_middleware)
@@ -112,13 +119,15 @@ async def redis_test():
         return {"error": "Failed to connect to Redis"}
     
 
-app.include_router(auth_router)
-app.include_router(user_router)
-app.include_router(exam_router)
-app.include_router(question_router)
-app.include_router(school_router)
-app.include_router(news_router)
-app.include_router(router)
+# app.include_router(auth_router)
+# app.include_router(user_router)
+# app.include_router(exam_router)
+# app.include_router(question_router)
+# app.include_router(school_router)
+# app.include_router(news_router)
+# app.include_router(router)
+app.include_router(v1_router, prefix="/api")
+
 
 
 if __name__=="__main__":

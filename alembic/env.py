@@ -46,7 +46,7 @@ config.set_main_option('sqlalchemy.url', settings.SQLITE_DATABASE_URL)
 
 # Import your Base and models
 # from app.models import Base 
-from app.infrastructure.database import Base
+from app.infrastructure.base import Base
 
 # add your model's MetaData object here
 # for 'autogenerate' support

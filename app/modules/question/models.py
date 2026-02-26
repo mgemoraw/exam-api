@@ -8,14 +8,16 @@ from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, F
 from datetime import datetime
 from enum import Enum
 
-from app.infrastructure.database import Base
+from app.infrastructure.base import Base
 # from ..school.models import Department
+# from ..school.models import Program 
 
 
 
 
 
 class Question(Base):
+    
     __tablename__ = "questions"
     id: Mapped[str] = Column(String(36), primary_key=True, index=True,default=lambda: str(uuid.uuid4()))
     exam_id: Mapped[str] = Column(String(36), ForeignKey('exam.id'), nullable=False)

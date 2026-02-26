@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func, TEXT
 from sqlalchemy.orm import relationship, Mapped,mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from app.infrastructure.database import Base
+from app.infrastructure.base import Base
 from ..address.models import Address
 from ..question.models import Question 
 # from ..user.models import Student

@@ -14,7 +14,6 @@ from .school import Department
 
 
 
-
 class Question(Base):
     __tablename__ = "questions"
     id: Mapped[str] = Column(String(36), primary_key=True, index=True,default=lambda: str(uuid.uuid4()))

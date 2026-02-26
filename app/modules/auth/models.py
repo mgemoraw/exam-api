@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 
 import uuid
 
-from app.infrastructure.database import Base
+from app.infrastructure.base import Base
 from enum import Enum
 from datetime import datetime
 from typing import List, Optional

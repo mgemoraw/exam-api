@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 import uuid 
 
-from app.infrastructure.database import Base
+from app.infrastructure.base import Base
 
 
 class News(Base):

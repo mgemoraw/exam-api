@@ -9,13 +9,12 @@ import uuid
 from uuid import uuid4
 from sqlalchemy.dialects.postgresql import UUID
 
-from ..auth.models import RefreshToken
-from ..exam.models import ExamAttempt 
-from ..news.models import News
 
+from app.infrastructure.base import Base
+# from ..auth.models import RefreshToken
+# from ..exam.models import ExamAttempt 
+# from ..news.models import News
 
-# from app.models.auth import RefreshToken
-from app.infrastructure.database import Base
 from datetime import datetime
 from enum import Enum
 

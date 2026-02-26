@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 
 import uuid
-from app.infrastructure.database import Base
+from app.infrastructure.base import Base
 
 
 class Address(Base):

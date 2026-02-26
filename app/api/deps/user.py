@@ -5,7 +5,7 @@ from uuid import UUID
 
 from app.infrastructure.database import get_db
 from app.core.security import oauth2_scheme, SECRET_KEY, ALGORITHM
-from app.models.user import User
+from app.modules.user.models import User
 
 
 credentials_exception = HTTPException(

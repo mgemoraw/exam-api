@@ -7,6 +7,25 @@ import os
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
 
+# import all models here
+from app.modules.school.models import (
+    University, 
+    Faculty,
+    Department, 
+    Program, 
+    Module, 
+    Course,
+)
+from app.modules.exam.models import (
+    Exam,
+    ExamAttempt,
+    ExamQuestion
+)
+
+from app.modules.address.models import Address
+from app.modules.user.models import User, Student, UserProfile, StudentProfile
+from app.modules.question.models import Question, Option
+from app.modules.news.models import News
 
 # user environment variables in production
 DATABASE_URL  = os.getenv('SQLITE_DB_URL', 'sqlite:///./data.db')
@@ -60,6 +79,3 @@ convention = {
 
 metadata = MetaData(naming_convention=convention)
 
-class Base(DeclarativeBase):
-    metadata = metadata
-    pass
