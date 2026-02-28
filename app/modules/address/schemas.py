@@ -12,6 +12,15 @@ class AddressCreateRequest(BaseModel):
 
     model_config=ConfigDict(from_attributes=True)
 
+class AddressUpdateRequest(BaseModel):
+    street: str
+    city: str
+    state: str
+    zip_code: str
+    country: str
+
+    model_config=ConfigDict(from_attributes=True)
+
 class AddressResponse(BaseModel):
     id: UUID | str
     street: str
