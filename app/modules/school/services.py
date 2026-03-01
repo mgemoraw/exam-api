@@ -65,12 +65,10 @@ class UniversityService:
             if address_data:
                 # We reuse the logic from your address creator
                 # Note: In a true UoW, create_address should not commit internally
-                address_service = AddressService(
-                    AddressRepository(self.db),
-                )
+                address_service = AddressService(self.db)
                 address = address_service.create_address(address_data)
                 # address_id = address_service.create_address(address_data)
-                new_university.address_id = str(address.address_id)
+                new_university.address_id = str(address.id)
 
             # 4. Atomic Save
             self.db.add(new_university)
@@ -81,10 +79,10 @@ class UniversityService:
         except Exception as e:
             self.db.rollback()
             # Log the actual error here for developers
-            print(f"Error creating university: {e}")
+            # print(f"Error creating university: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-                detail="Failed to create university record"
+                detail=f"Failed to create university record {str(e)}"
             )
   
     def update_university(self, uni_id: str, data: UniversityUpdateRequest) -> University:

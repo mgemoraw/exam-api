@@ -6,278 +6,196 @@
         "name": "Bahir Dar Institute of Technology",
         "faculties": [
           {
-            "name": "Faculty of Computing",
+            "name": "Faculty of Electrical and Computer Engineeering",
+            "slug": "FECE",
             "programes": [
               {
-                "name": "Software Engineering",
-                "modules": [
-                  {
-                    "title": "Software Design and Architecture",
-                    "courses": [
-                      {
-                        "name": "Introduction to Software Design and Architecture",
-                        "code": "SE201"
-                      },
-                      {
-                        "name": "Advanced Software Design and Architecture",
-                        "code": "SE301"
-                      }
-                    ]
-                  },
-                  {
-                    "title": "Software Testing and Quality Assurance",
-                    "courses": [
-                      {
-                        "name": "Introduction to Software Testing and Quality Assurance",
-                        "code": "SE202"
-                      },
-                      {
-                        "name": "Advanced Software Testing and Quality Assurance",
-                        "code": "SE302"
-                      }
-                    ]
-                  },
-                  {
-                    "title": "Data Structures and Algorithms",
-                    "courses": [
-                      {
-                        "name": "Introduction to Data Structures and Algorithms",
-                        "code": "CSE202"
-                      },
-                      {
-                        "name": "Advanced Data Structures and Algorithms",
-                        "code": "CSE302"
-                      }
-                    ]
-                  },
-                  {
-                    "title": "Operating Systems",
-                    "courses": [
-                      {
-                        "name": "Introduction to Operating Systems",
-                        "code": "CSE203"
-                      },
-                      {
-                        "name": "Advanced Operating Systems",
-                        "code": "CSE303"
-                      }
-                    ]
-                  },
-                  {
-                    "title": "Computer Programming",
-                    "courses": [
-                      {
-                        "name": "Introduction to Computer Programming",
-                        "code": "CSE203"
-                      },
-                      {
-                        "name": "Advanced Computer Programmin g",
-                        "code": "CSE303"
-                      },
-                      {
-                        "name": "Object-Oriented Programming",
-                        "code": "CSE204"
-                      }
-                    ]
-                  }
-                ]
+                "name": "Electrical Engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "slug": "electrical-engineering",
+                "modules": [],
+                "courses": []
+              },
+              {
+                "name": "Computer Engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "slug": "computer-engineering",
+                "modules": [],
+                "courses": []
               }
             ]
           },
 
           {
-            "name": "Electrical and Computer Engineering",
-            "modules": [
+            "name": "Faculty of Civil and Water Resouces Engineeering",
+            "slug": "FCWRE",
+            "programes": [
               {
-                "title": "Circuit Analysis",
-                "courses": [
-                  {
-                    "name": "Introduction to Circuit Analysis",
-                    "code": "ECE201"
-                  }
-                ]
+                "name": "Civil Engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "slug": "civil-engineering",
+                "modules": [],
+                "courses": []
               },
               {
-                "title": "Digital Systems",
-                "courses": [
-                  {
-                    "name": "Introduction to Digital Systems",
-                    "code": "ECE202"
-                  }
-                ]
+                "name": "Hydraulic and Water Resources Engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "slug": "hydraulic-and-water-resources-engineering",
+                "modules": [],
+                "courses": []
+              },
+              {
+                "name": "Water Resources and Irrigation Engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "slug": "water-resouces-and-irrigation-engineering",
+                "modules": [],
+                "courses": []
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Computing",
+            "programes": [
+              {
+                "name": "Computer Science",
+                "slug": "computer-science",
+                "year_of_study": 4,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              },
+              {
+                "name": "Cyber Security",
+                "slug": "cyber-security",
+                "year_of_study": 4,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              },
+              {
+                "name": "Information Science",
+                "slug": "information-science",
+                "year_of_study": 4,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              },
+              {
+                "name": "Information Technology",
+                "slug": "information-technology",
+                "year_of_study": 4,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              },
+              {
+                "name": "Software Engineering",
+                "slug": "software-engineering",
+                "year_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Chemical and Food Engineering",
+            "slug": "FCFE",
+            "programs": [
+              {
+                "name": "Chemical Engineering",
+                "slug": "chemical-engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              },
+              {
+                "name": "Food Engineering",
+                "slug": "food-engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              },
+              {
+                "name": "Applied Human Nutrition",
+                "slug": "applied-human-nutrition",
+                "years_of_study": 4,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Mechanical and Industrial Engineering",
+            "slug": "FMOE",
+            "programs": [
+              {
+                "name": "Mechanical Engineering",
+                "slug": "mechanical-engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              },
+              {
+                "name": "Automotive Engineering",
+                "slug": "automotive-engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              },
+              {
+                "name": "Electro Mechanical Engineering",
+                "slug": "electro-mechanical-engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
               }
             ]
           }
-        ]
-      },
-
-      {
-        "name": "Institute of Land Administration",
-        "faculties": [
+        ],
+        "schools": [
           {
-            "name": "Faculty of Agriculture",
-            "programes": [
+            "name": "School of Material Science",
+            "slug": "SMS",
+            "programs": [
               {
-                "name": "Agricultural Science",
-                "modules": [
-                  {
-                    "title": "Crop Science",
-                    "courses": [
-                      {
-                        "name": "Introduction to Crop Science",
-                        "code": "AG201"
-                      }
-                    ]
-                  },
-                  {
-                    "title": "Soil Science",
-                    "courses": [
-                      {
-                        "name": "Introduction to Soil Science",
-                        "code": "AG202"
-                      }
-                    ]
-                  }
-                ]
+                "name": "Material Science",
+                "slug": "material-science",
+                "years_of_study": 4,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
+              }
+            ]
+          },
+          {
+            "name": "School of Aerospace Engineering",
+            "slug": "SAE",
+            "programs": [
+              {
+                "name": "Aerospace Engineering",
+                "slug": "aerospace-engineering",
+                "years_of_study": 5,
+                "level_of_study": "Bachelor of Science",
+                "modules": [],
+                "courses": []
               }
             ]
           }
         ]
       }
     ],
-    "colleges": [
-      {
-        "name": "College of Medicine and Health Sciences",
-        "faculties": [
-          {
-            "name": "Faculty of Medicine",
-            "programes": [
-              {
-                "name": "General Medicine",
-                "modules": [
-                  {
-                    "title": "Anatomy",
-                    "courses": [
-                      {
-                        "name": "Introduction to Anatomy",
-                        "code": "MED201"
-                      }
-                    ]
-                  },
-                  {
-                    "title": "Physiology",
-                    "courses": [
-                      {
-                        "name": "Introduction to Physiology",
-                        "code": "MED202"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "College of Agriculture and Environmental Sciences",
-        "faculties": [
-          {
-            "name": "Faculty of Environmental Science",
-            "programes": [
-              {
-                "name": "Environmental Science",
-                "modules": [
-                  {
-                    "title": "Environmental Chemistry",
-                    "courses": [
-                      {
-                        "name": "Introduction to Environmental Chemistry",
-                        "code": "ENV201"
-                      }
-                    ]
-                  },
-                  {
-                    "title": "Environmental Policy and Management",
-                    "courses": [
-                      {
-                        "name": "Introduction to Environmental Policy and Management",
-                        "code": "ENV202"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "College of Business and Economics",
-        "faculties": [
-          {
-            "name": "Faculty of Business Administration",
-            "programes": [
-              {
-                "name": "Business Administration",
-                "modules": [
-                  {
-                    "title": "Principles of Management",
-                    "courses": [
-                      {
-                        "name": "Introduction to Principles of Management",
-                        "code": "BA201"
-                      }
-                    ]
-                  },
-                  {
-                    "title": "Marketing Management",
-                    "courses": [
-                      {
-                        "name": "Introduction to Marketing Management",
-                        "code": "BA202"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "College of Social Sciences and Humanities",
-        "faculties": [
-          {
-            "name": "Faculty of Sociology",
-            "programes": [
-              {
-                "name": "Sociology",
-                "modules": [
-                  {
-                    "title": "Introduction to Sociology",
-                    "courses": [
-                      {
-                        "name": "Introduction to Sociology",
-                        "code": "SOC201"
-                      }
-                    ]
-                  },
-                  {
-                    "title": "Social Research Methods",
-                    "courses": [
-                      {
-                        "name": "Introduction to Social Research Methods",
-                        "code": "SOC202"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
+    "colleges": []
   }
 }

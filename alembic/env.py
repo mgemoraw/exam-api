@@ -46,6 +46,14 @@ config.set_main_option('sqlalchemy.url', settings.SQLITE_DATABASE_URL)
 
 # Import your Base and models
 # from app.models import Base 
+# Import models to register them with Base.metadata
+import app.modules.exam.models
+import app.modules.user.models
+import app.modules.auth.models
+import app.modules.question.models
+import app.modules.address.models 
+import app.modules.news.models 
+import app.modules.school.models 
 from app.infrastructure.base import Base
 
 # add your model's MetaData object here

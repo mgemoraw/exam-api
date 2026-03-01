@@ -2,7 +2,7 @@ import uuid
 from pydantic import BaseModel, EmailStr
 from uuid import UUID
 from typing import Optional, List
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Mapped
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Mapped, mapped_column
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, Float, Text, Enum as SQLEnum, JSON
 
 from datetime import datetime
@@ -30,6 +30,7 @@ class Exam(Base):
     __tablename__ = "exam"
     id: Mapped[str] = Column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     title: Mapped[str] = Column(String(255), nullable=False)
+    program_id: Mapped[str] = mapped_column(String(36), ForeignKey('programes.id'), nullable=False)
     maximum_marks: Mapped[int] = Column(Integer, default=100, nullable=False)
     duration_minutes: Mapped[int] = Column(Integer, nullable=False)
     exam_type = Column(SQLEnum(ExamTypeEnum), server_default=ExamTypeEnum.MODEL_EXIT_EXAM.value, nullable=False)
@@ -46,7 +47,7 @@ class Exam(Base):
     exam_questions: Mapped[List["ExamQuestion"]] = relationship("ExamQuestion", back_populates="exam", cascade="all, delete-orphan")
     attempts: Mapped[List['ExamAttempt']] = relationship('ExamAttempt', back_populates='exam', foreign_keys='ExamAttempt.exam_id')
     user:Mapped['User'] = relationship('User', back_populates='created_exams', foreign_keys=[created_by])
-
+    program: Mapped['Program'] = relationship('Program', back_populates='exams', foreign_keys=[program_id])
 
 class ExamQuestion(Base):
     __tablename__ = "exam_questions"

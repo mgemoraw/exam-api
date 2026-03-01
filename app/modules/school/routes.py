@@ -1,5 +1,5 @@
 from app.modules.school.services import FacultyService
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status 
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, and_
 from app.infrastructure.database import get_db
@@ -186,7 +186,40 @@ async def get_programs(db: Session=Depends(get_db)):
     programs = db.query(Program).all()
     return programs
 
+@school_router.post("/programs", response_model=ProgramResponse)
+async def create_program(program: ProgramCreateRequest, db:Session=Depends(get_db)):
+    existing = db.query(Program).filter(Program.name==program.name).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Program name already exists!"
+        )
 
+    faculty = db.query(Faculty).filter(Faculty.code==program.faculty_code).first()
+
+    if not faculty:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Faculty not found!"
+        )
+    
+    # university = db.query(University).filter(University.code==program.university_code).first()
+    # if not university:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="University not found!"
+    #     )
+    
+    new_program = Program(
+        name = program.name,
+        faculty_id = faculty.id,
+        years_of_study=program.year_of_study,
+    )
+
+    db.add(new_program)
+    db.commit()
+    db.refresh(new_program)
+    return new_program
 
 @school_router.get("/modules", response_model=list[ModuleResponse])
 async def get_modules(db: Session = Depends(get_db)):

@@ -134,12 +134,15 @@ class ProgramCreateRequest(BaseModel):
     name: str
     university_code: str
     faculty_code: str
+    year_of_study: int
+
     
 
 
 class ProgramResponse(BaseModel):
     id: Optional[UUID] = None
     name: str
+    years_of_study: int
     faculty: Optional['FacultyResponse'] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

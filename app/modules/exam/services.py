@@ -9,6 +9,7 @@ from .repository import ExamRepository
 from .models import Exam
 from .exceptions import ExamNotFoundError, ExamAlreadyExistsError
 from .schemas import ExamResponse, ExamCreateRequest
+from ..school.models import Program 
 class ExamService:
 
     CACHE_TTL = 300  # 5 minutes
@@ -49,6 +50,9 @@ class ExamService:
     #         })
     #     )
 
+    def get_exams(self, skip=False, limit=20):
+        return self.repo.list(skip=False, limit=limit)
+
     def get_exam(self, exam_id: uuid.UUID) -> ExamResponse:
         cache_key = self._cache_key(exam_id)
 
@@ -83,7 +87,9 @@ class ExamService:
 
     def create_exam(self, exam_data: ExamCreateRequest) -> Exam:
         # 🔹 1. Business validations
-
+        program = self.db.query(Program).filter(Program.name==exam_data.program).first()
+        if not program:
+            raise ValueError("Program not registered. please select a valid program")
         if exam_data.maximum_marks <= 0:
             raise ValueError("Maximum marks must be greater than zero.")
 
@@ -102,8 +108,9 @@ class ExamService:
 
         # 🔹 3. Create Exam entity
         exam = Exam(
-            id=uuid.uuid4(),  # if UUID primary key
+            id=str(uuid.uuid4()),  # if UUID primary key
             title=exam_data.title,
+            program_id=program.id,
             maximum_marks=exam_data.maximum_marks,
             duration_minutes=exam_data.duration_minutes,
             is_visible=exam_data.is_visible,

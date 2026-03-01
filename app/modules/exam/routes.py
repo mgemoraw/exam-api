@@ -9,6 +9,8 @@ from .exceptions import ExamNotFoundError, ExamAlreadyExistsError
 router = APIRouter(prefix="/exams", tags=["Exams"])
 
 
+
+
 @router.post("/", response_model=ExamResponse)
 def create_exam(
     payload: ExamCreateRequest,
@@ -17,10 +19,7 @@ def create_exam(
     service = ExamService(db)
 
     try:
-        exam = service.create_exam(
-            title=payload.title,
-            total_marks=payload.total_marks
-        )
+        exam = service.create_exam(payload)
         return exam
 
     except ExamAlreadyExistsError:
@@ -29,6 +28,19 @@ def create_exam(
             detail="Exam already exists"
         )
 
+
+@router.get("/all")
+def get_exams(skip=False, limit=20, db:Session=Depends(get_db)):
+    try:
+        service = ExamService(db)
+        exams = service.get_exams(skip=skip, limit=limit)
+        return exams 
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error: {str(e)}"
+        )
+    
 
 @router.get("/{exam_id}", response_model=ExamResponse)
 def get_exam(exam_id: UUID, db: Session = Depends(get_db)):

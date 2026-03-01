@@ -11,6 +11,7 @@ class ExamRequest(BaseModel):
 
 class ExamCreateRequest(BaseModel):
     title: str
+    program: str
     maximum_marks: int = 100
     duration_minutes: int
     is_visible: bool = False
@@ -27,6 +28,7 @@ class ExamCreateRequest(BaseModel):
 class ExamResponse(BaseModel):
     id: UUID | str
     title: str
+    program: str
     maximum_marks: int
     duration_minutes: int
     exam_type: ExamTypeEnum
