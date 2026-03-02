@@ -2,74 +2,36 @@ import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-# from app.db.session import async_session  # your async session
-# from app.models.university import University
-# from app.models.institute import Institute
-# from app.models.faculty import Faculty
-# from app.models.school import School
-# from app.models.program import Program
+from app.db.session import async_session, SessionLocal  # your async session
+from app.modules.school.models import (
+    University,
+    Institute,
+    Program,
+    Faculty,
+    School,
+    Department,
+    Course,
+    Module,
+)
+import json 
+import os 
 
 
-seed_data = {
-    "name": "Bahir Dar University",
-    "institutes": [
-        {
-            "name": "Bahir Dar Institute of Technology",
-            "faculties": [
-                {
-                    "name": "Faculty of Electrical and Computer Engineering",
-                    "slug": "FECE",
-                    "programs": [
-                        {
-                            "name": "Electrical Engineering",
-                            "slug": "electrical-engineering",
-                            "years_of_study": 5,
-                            "level_of_study": "Bachelor of Science",
-                        },
-                        {
-                            "name": "Computer Engineering",
-                            "slug": "computer-engineering",
-                            "years_of_study": 5,
-                            "level_of_study": "Bachelor of Science",
-                        },
-                    ],
-                },
-                {
-                    "name": "Faculty of Computing",
-                    "slug": "FOC",
-                    "programs": [
-                        {
-                            "name": "Computer Science",
-                            "slug": "computer-science",
-                            "years_of_study": 4,
-                            "level_of_study": "Bachelor of Science",
-                        },
-                        {
-                            "name": "Software Engineering",
-                            "slug": "software-engineering",
-                            "years_of_study": 5,
-                            "level_of_study": "Bachelor of Science",
-                        },
-                    ],
-                },
-            ],
-            "schools": [
-                {
-                    "name": "School of Aerospace Engineering",
-                    "slug": "SAE",
-                    "programs": [
-                        {
-                            "name": "Aerospace Engineering",
-                            "slug": "aerospace-engineering",
-                            "years_of_study": 5,
-                            "level_of_study": "Bachelor of Science",
-                        }
-                    ],
-                }
-            ],
-        }
-    ],
-}
+def load_academic_structure(path:str):
+    with open(path, 'r') as json_file:
+        data = json_file.read()
+        return json.loads(data)
+ 
+def seed_academic_structure():
+    # path to json file
+    json_path = os.path.join(os.path.dirname(__file__), "academic_structure.json")
+
+    with open(json_path, "r") as file:
+        structure = json.load(file)
+
+
+
+seed_data= {}
 
 
 async def seed():
@@ -145,4 +107,5 @@ async def seed():
 
 
 if __name__ == "__main__":
-    asyncio.run(seed())
+    # asyncio.run(seed())
+    seed_academic_structure()

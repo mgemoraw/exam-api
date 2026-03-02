@@ -46,6 +46,16 @@ class Settings(BaseSettings):
 
     # SQLite (for development)
     SQLITE_DATABASE_URL: Optional[str] = os.getenv("SQLITE_DATABASE_URL", "sqlite:///./data.db")
+    DATABASE_URL: Optional[str] = os.getenv("DATABASE_URL", None)
+    
+
+    @property
+    def ASYNC_DATABASE_URL(self) -> str:
+        """Get asynchronous database URL for Alembic migrations"""
+        if self.DATABASE_URL:
+            return self.DATABASE_URL.replace("+asyncpg", "")
+        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+    
 
     @property
     def SYNC_DATABASE_URL(self) -> str:
@@ -93,7 +103,7 @@ class Settings(BaseSettings):
     
     # 9. Logging Settings
     LOG_LEVEL: str = "INFO"
-    LOG_FILE: Optional[str] = "./logs/attendance.log"
+    LOG_FILE: Optional[str] = "./logs/app.log"
     
     # 10. Testing Settings
     TESTING: bool = False

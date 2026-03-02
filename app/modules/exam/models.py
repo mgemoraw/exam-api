@@ -30,7 +30,7 @@ class Exam(Base):
     __tablename__ = "exam"
     id: Mapped[str] = Column(String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     title: Mapped[str] = Column(String(255), nullable=False)
-    program_id: Mapped[str] = mapped_column(String(36), ForeignKey('programes.id'), nullable=False)
+    program_id: Mapped[str] = mapped_column(String(36), ForeignKey('programs.id'), nullable=False)
     maximum_marks: Mapped[int] = Column(Integer, default=100, nullable=False)
     duration_minutes: Mapped[int] = Column(Integer, nullable=False)
     exam_type = Column(SQLEnum(ExamTypeEnum), server_default=ExamTypeEnum.MODEL_EXIT_EXAM.value, nullable=False)

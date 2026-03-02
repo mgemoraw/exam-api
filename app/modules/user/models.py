@@ -116,7 +116,7 @@ class Student(Base):
         nullable=False
     )
     enrollment_number: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    program_id: Mapped[str] = mapped_column(String(36), ForeignKey('programes.id'))
+    program_id: Mapped[str] = mapped_column(String(36), ForeignKey('programs.id'))
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
 

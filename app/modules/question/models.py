@@ -25,7 +25,7 @@ class Question(Base):
     marks: Mapped[int] = Column(Integer, default=1)
 
     department_id: Mapped[str] = Column(String(36), ForeignKey('departments.id'), nullable=True)
-    program_id: Mapped[str] = Column(String(36), ForeignKey('programes.id'), nullable=True)
+    program_id: Mapped[str] = Column(String(36), ForeignKey('programs.id'), nullable=True)
     
     course_id: Mapped[str] = Column(String(36), ForeignKey('courses.id'), nullable=True)
     module_id: Mapped[str] = Column(String(36), ForeignKey('modules.id'), nullable=True)

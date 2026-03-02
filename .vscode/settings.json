@@ -11,5 +11,6 @@
       "name": "exam-api",
       "group": "exam-api"
     }
-  ]
+  ],
+  "sqltools.useNodeRuntime": true
 }
