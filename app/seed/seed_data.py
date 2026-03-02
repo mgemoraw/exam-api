@@ -1,7 +1,7 @@
 import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-
+from sqlalchemy import select, and_
+# from sqlalchemy.orm import and_, or_, func
 from app.db.session import async_session, SessionLocal  # your async session
 from app.modules.school.models import (
     University,
@@ -13,8 +13,17 @@ from app.modules.school.models import (
     Course,
     Module,
 )
+from app.modules.address.models import Address
+from app.modules.exam.models import Exam
+from app.modules.question.models import Question
+from app.modules.user.models import User, Student
+from app.modules.auth.models import RefreshToken
+from app.modules.news.models import News
+
 import json 
 import os 
+from datetime import timezone, datetime
+
 
 
 def load_academic_structure(path:str):
@@ -25,11 +34,107 @@ def load_academic_structure(path:str):
 def seed_academic_structure():
     # path to json file
     json_path = os.path.join(os.path.dirname(__file__), "academic_structure.json")
-
+    session = SessionLocal()\
+    
     with open(json_path, "r") as file:
         structure = json.load(file)
 
+        uni_data = structure.get("university")
+        uni_address = uni_data.get("address")
+        address = session.execute(
+            select(Address).where(
+                and_(
+                    Address.city==uni_address['city'],
+                    Address.city==uni_address['country'],
+                    Address.city==uni_address['street'],
+                    Address.city==uni_address['zipcode'],
+                )
+            )
+        )
+        # Prevent duplicate seeding
+        result =  session.execute(
+            select(University).where(
+                University.code == uni_data["code"]
+            )
+        )
+        
+        university = result.scalars().first()
+        if not university:
+            print("Seed data already exists.")
+            # return
 
+            university = University(
+                name=uni_data["name"],
+                code=uni_data['code'],
+                address_id=address.id,
+                )
+            session.add(university)
+            session.flush()
+
+        institutes = uni_data.get("institutes")
+        for ins_data in institutes:
+            result =  session.execute(
+                    select(Institute).where(
+                        Institute.name == ins_data["name"]
+                    )
+                )
+            institute = result.scalars().first()
+
+            if  not institute:
+                
+                institute = Institute(
+                    name=ins_data['name'],
+                    slug_source_field="name",
+                    university_id=university.id,
+                    updated_at = datetime.now(timezone.utc)
+                )
+                session.add(institute)
+                session.flush()
+            
+            faculties = ins_data.get("faculties")
+            for fa_data in faculties:
+                # Prevent duplicate seeding
+                result =  session.execute(
+                    select(Faculty).where(
+                        Faculty.code == fa_data["code"]
+                    )
+                )
+                faculty = result.scalars().first()
+                if not faculty:
+                    
+                    faculty = Faculty(
+                        name=fa_data['name'],
+                        code=fa_data['code'],
+                        university_id=university.id,
+                        institute_id=institute.id,
+                    )
+                    session.add(faculty)
+                    session.flush()
+
+                programs = fa_data.get("programs")
+                for pr_data in programs:
+                     # Prevent duplicate seeding
+                    result =  session.execute(
+                        select(Program).where(
+                            Program.name == pr_data["name"]
+                        )
+                    )
+                    program = result.scalars().first()
+                    if not program:
+                        print("adding program...")
+                        program = Program(
+                            name=pr_data['name'],
+                            # slug=pr_data['slug'],
+                            years_of_study=pr_data['years_of_study'],
+                            level_of_study=pr_data['level_of_study'],
+                            faculty_id=faculty.id,
+                            school_id = faculty.id,
+                        )
+                        session.add(program)
+                        session.flush()
+
+        # Finally commit changes
+        session.commit()
 
 seed_data= {}
 
@@ -100,6 +205,7 @@ async def seed():
                             school_id=school.id,
                         )
                         session.add(program)
+                        
 
         await session.commit()
 

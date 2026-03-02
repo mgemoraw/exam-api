@@ -141,7 +141,7 @@ class Program(Base):
     courses = relationship("Course", back_populates="program")
     questions = relationship("Question", back_populates="program", foreign_keys='Question.program_id')
 
-    students: Mapped[List['Student']] = relationship('Student', back_populates='program', cascade='delete-orphan')
+    students: Mapped[List['Student']] = relationship('Student', back_populates='program', cascade='delete, delete-orphan')
     exams: Mapped[List['Exam']] = relationship('Exam', back_populates='program')
     school: Mapped['School'] = relationship('School', back_populates='programs')
     

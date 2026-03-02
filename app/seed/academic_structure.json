@@ -1,14 +1,26 @@
 {
   "university": {
     "name": "Bahir Dar University",
+    "slug": "bahir-dar-university",
+    "code": "BDU",
+    "address": {
+      "country": "Ethiopia",
+      "city": "Bahir Dar",
+      "state": "Amhara",
+      "street": "A3",
+      "zipcode": "6000"
+    },
     "institutes": [
       {
         "name": "Bahir Dar Institute of Technology",
+        "slug": "bahir-dar-institute-of-technology",
+        "description": "",
         "faculties": [
           {
             "name": "Faculty of Electrical and Computer Engineeering",
-            "slug": "FECE",
-            "programes": [
+            "code": "FECE",
+            "slug": "faculty-of-electrical-and-computer-engineering",
+            "programs": [
               {
                 "name": "Electrical Engineering",
                 "years_of_study": 5,
@@ -30,8 +42,9 @@
 
           {
             "name": "Faculty of Civil and Water Resouces Engineeering",
-            "slug": "FCWRE",
-            "programes": [
+            "code": "FCWRE",
+            "slug": "faculty-of-civil-and-water-resources-engineering",
+            "programs": [
               {
                 "name": "Civil Engineering",
                 "years_of_study": 5,
@@ -60,11 +73,13 @@
           },
           {
             "name": "Faculty of Computing",
-            "programes": [
+            "code": "FC",
+            "slug": "faculty-of-computing",
+            "programs": [
               {
                 "name": "Computer Science",
                 "slug": "computer-science",
-                "year_of_study": 4,
+                "years_of_study": 4,
                 "level_of_study": "Bachelor of Science",
                 "modules": [],
                 "courses": []
@@ -72,7 +87,7 @@
               {
                 "name": "Cyber Security",
                 "slug": "cyber-security",
-                "year_of_study": 4,
+                "years_of_study": 4,
                 "level_of_study": "Bachelor of Science",
                 "modules": [],
                 "courses": []
@@ -80,7 +95,7 @@
               {
                 "name": "Information Science",
                 "slug": "information-science",
-                "year_of_study": 4,
+                "years_of_study": 4,
                 "level_of_study": "Bachelor of Science",
                 "modules": [],
                 "courses": []
@@ -88,7 +103,7 @@
               {
                 "name": "Information Technology",
                 "slug": "information-technology",
-                "year_of_study": 4,
+                "years_of_study": 4,
                 "level_of_study": "Bachelor of Science",
                 "modules": [],
                 "courses": []
@@ -96,7 +111,7 @@
               {
                 "name": "Software Engineering",
                 "slug": "software-engineering",
-                "year_of_study": 5,
+                "years_of_study": 5,
                 "level_of_study": "Bachelor of Science",
                 "modules": [],
                 "courses": []
@@ -105,7 +120,8 @@
           },
           {
             "name": "Faculty of Chemical and Food Engineering",
-            "slug": "FCFE",
+            "code": "FCFE",
+            "slug": "faculty-of-chemical-and-food-engineering",
             "programs": [
               {
                 "name": "Chemical Engineering",
@@ -135,7 +151,8 @@
           },
           {
             "name": "Faculty of Mechanical and Industrial Engineering",
-            "slug": "FMOE",
+            "code": "FMOE",
+            "slug": "faculty-of-mechanical-and-industrial-engineering",
             "programs": [
               {
                 "name": "Mechanical Engineering",
@@ -167,7 +184,8 @@
         "schools": [
           {
             "name": "School of Material Science",
-            "slug": "SMS",
+            "code": "SMS",
+            "slug": "school-of-material-science",
             "programs": [
               {
                 "name": "Material Science",
@@ -181,7 +199,8 @@
           },
           {
             "name": "School of Aerospace Engineering",
-            "slug": "SAE",
+            "scodeg": "SAE",
+            "slug": "school-of-aerospace-engineering",
             "programs": [
               {
                 "name": "Aerospace Engineering",
