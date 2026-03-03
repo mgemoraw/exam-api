@@ -5,7 +5,7 @@ from typing import Optional
 
 from pydantic.alias_generators import to_camel  
 from datetime import datetime
-from app.modules.app_base_model import AppBaseModel
+from app.features.app_base_model import AppBaseModel
 from uuid import UUID
 
 class UserBase(AppBaseModel):

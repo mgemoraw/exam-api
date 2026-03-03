@@ -1,4 +1,4 @@
-from app.modules.school.services import FacultyService
+from app.features.school.services import FacultyService
 from fastapi import APIRouter, Depends, HTTPException, status 
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, and_
@@ -124,7 +124,7 @@ async def delete_university(university_id: uuid.UUID, db: Session = Depends(get_
     if not university:
         raise HTTPException(status_code=404, detail="University not found")
     db.delete(university)
-    db.commit()
+    db.flush()
     return {"detail": "University deleted successfully"}
 
 
@@ -176,7 +176,7 @@ async def create_department(department: DepartmentCreateRequest, db: Session = D
     )
 
     db.add(department)
-    db.commit()
+    db.flush()
     db.refresh(department)
     return department
 
@@ -217,7 +217,7 @@ async def create_program(program: ProgramCreateRequest, db:Session=Depends(get_d
     )
 
     db.add(new_program)
-    db.commit()
+    db.flush()
     db.refresh(new_program)
     return new_program
 
@@ -254,7 +254,7 @@ async def create_module(module: ModuleCreateRequest, db: Session = Depends(get_d
     )
 
     db.add(new_module)
-    db.commit()
+    db.flush()
     db.refresh(new_module)
     return new_module
 
@@ -304,7 +304,7 @@ async def create_course(course: CourseCreateRequest, db: Session = Depends(get_d
     )
 
     db.add(new_course)
-    db.commit()
+    db.flush()
     db.refresh(new_course)
     return new_course
 
@@ -315,7 +315,7 @@ async def delete_course(course_id: uuid.UUID, db: Session = Depends(get_db)):
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     db.delete(course)
-    db.commit()
+    db.flush()
     return {"detail": "Course deleted successfully"}
 
 

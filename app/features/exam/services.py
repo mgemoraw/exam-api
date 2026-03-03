@@ -80,7 +80,7 @@ class ExamService:
             raise ExamNotFoundError()
 
         self.repo.delete(exam)
-        self.db.commit()
+        self.db.flush()
 
         redis_client.delete(self._cache_key(exam_id))
 
@@ -124,7 +124,7 @@ class ExamService:
         try:
             # 🔹 4. Persist
             self.repo.create(exam)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(exam)
 
             return exam

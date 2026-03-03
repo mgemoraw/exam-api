@@ -52,19 +52,17 @@ class AddressRepository:
     
     def create(self, address: Address):        
         self.db.add(address)
-        self.db.commit()
-        self.db.refresh(address)
+        self.db.flush()
         return address
     
 
     def update(self, address: Address):
         self.db.add(address)
-        self.db.commit()
-        self.db.refresh(address)
+        self.db.flush()
         return address
     
     def delete(self, address:Address) -> Address:
         self.db.delete(address)
-        self.db.commit()
+        self.db.flush()
         return address 
     

@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, Session, declarative_base, DeclarativeBase
-from typing import Generator
+from typing import AsyncGenerator, Generator
 import os 
 
 # ASYNC SQLALCHEMY IMPORTS
@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 
 
 # import all models here
-from app.modules.school.models import (
+from app.features.school.models import (
     University, 
     Faculty,
     Department, 
@@ -16,16 +16,16 @@ from app.modules.school.models import (
     Module, 
     Course,
 )
-from app.modules.exam.models import (
+from app.features.exam.models import (
     Exam,
     ExamAttempt,
     ExamQuestion
 )
 
-from app.modules.address.models import Address
-from app.modules.user.models import User, Student, UserProfile, StudentProfile
-from app.modules.question.models import Question, Option
-from app.modules.news.models import News
+from app.features.address.models import Address
+from app.features.user.models import User, Student, UserProfile, StudentProfile
+from app.features.question.models import Question, Option
+from app.features.news.models import News
 
 # user environment variables in production
 DATABASE_URL  = os.getenv('SQLITE_DB_URL', 'sqlite:///./data.db')
@@ -50,10 +50,13 @@ def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db
+        db.commit()          # ✅ commit if no error
+    except:
+        db.rollback()        # ✅ rollback on error
+        raise
     finally:
         db.close()
-
-
+        
 
 ## ASYNC SQLALCHEMY SETUP
 PG_DATABASE_URL = "postgresql+asyncpg://user:pass@localhost/exam_db"

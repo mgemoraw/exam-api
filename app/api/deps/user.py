@@ -7,7 +7,7 @@ from app.infrastructure.database import get_db
 from app.core.config import settings
 from app.core.security import oauth2_scheme
 
-from app.modules.user.models import User
+from app.features.user.models import User
 
 
 credentials_exception = HTTPException(

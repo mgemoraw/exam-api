@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 # from sqlalchemy.orm import and_, or_, func
 from app.db.session import async_session, SessionLocal  # your async session
-from app.modules.school.models import (
+from app.features.school.models import (
     University,
     Institute,
     Program,
@@ -13,12 +13,14 @@ from app.modules.school.models import (
     Course,
     Module,
 )
-from app.modules.address.models import Address
-from app.modules.exam.models import Exam
-from app.modules.question.models import Question
-from app.modules.user.models import User, Student
-from app.modules.auth.models import RefreshToken
-from app.modules.news.models import News
+
+from app.features.address.models import Address
+from app.features.exam.models import Exam
+from app.features.question.models import Question
+from app.features.user.models import User, Student
+from app.features.auth.models import RefreshToken
+from app.features.news.models import News
+from app.features.note.models import Chapter, Note
 
 import json 
 import os 
@@ -132,7 +134,44 @@ def seed_academic_structure():
                         )
                         session.add(program)
                         session.flush()
-
+            schools = ins_data.get("schools")
+            for sch_data in schools:
+                result = session.execute(
+                    select(School).where(
+                        School.slug==sch_data['slug']
+                    )
+                )
+                school = result.scalars().first()
+                if not school:
+                    school = School(
+                        name=sch_data['name'],
+                        university_id = university.id,
+                        institute_id=institute.id,
+                        updated_at = datetime.now(timezone.utc),
+                    )
+                    session.add(school)
+                    session.flush()
+                programs = sch_data.get("programs")
+                for pr_data in programs:
+                     # Prevent duplicate seeding
+                    result =  session.execute(
+                        select(Program).where(
+                            Program.name == pr_data["name"]
+                        )
+                    )
+                    program = result.scalars().first()
+                    if not program:
+                        print("adding program...")
+                        program = Program(
+                            name=pr_data['name'],
+                            # slug=pr_data['slug'],
+                            years_of_study=pr_data['years_of_study'],
+                            level_of_study=pr_data['level_of_study'],
+                            faculty_id=faculty.id,
+                            school_id = faculty.id,
+                        )
+                        session.add(program)
+                        session.flush()
         # Finally commit changes
         session.commit()
 

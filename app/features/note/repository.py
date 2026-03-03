@@ -14,3 +14,6 @@ class NoteRepository:
         self.db.flush()
 
         return note
+
+
+        

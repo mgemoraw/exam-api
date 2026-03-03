@@ -24,7 +24,7 @@ class NoteService:
             course=course_id,
         )
         self.db.add(new_chapter)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(new_chapter)
 
         return new_chapter

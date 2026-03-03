@@ -1,6 +1,6 @@
 """Utilities for handling addresses."""
 
-from app.modules.address.models import Address
+from app.features.address.models import Address
 
 
 class AddressService:

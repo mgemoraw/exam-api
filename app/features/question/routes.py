@@ -99,7 +99,7 @@ async def create_question(
             )
             db.add(option)
 
-        await db.commit()
+        await db.flush()
         await db.refresh(question)
 
         return question
@@ -147,7 +147,7 @@ async def upload_questions(
             db.add(question)
             created_ids.append(question.id)
 
-        db.commit()
+        db.flush()
 
     except Exception:
         db.rollback()

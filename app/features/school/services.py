@@ -72,7 +72,7 @@ class UniversityService:
 
             # 4. Atomic Save
             self.db.add(new_university)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(new_university)
             return new_university
 
@@ -89,7 +89,7 @@ class UniversityService:
         existing = self.get_university(uni_id)
         
         updated_university = self.repo.update(existing, data)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(updated_university)
         return updated_university
         
@@ -150,7 +150,7 @@ class FacultyService:
                 university_id = university.id
             )
             self.db.add(faculty)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(faculty)
                 
             return faculty

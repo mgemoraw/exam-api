@@ -9,6 +9,7 @@ from app.infrastructure.base import Base, MainModel
 # from ..address.models import Address
 # from ..question.models import Question 
 # from ..user.models import Student
+from ..note.models import Chapter
 
 class University(Base):
     __tablename__ = "universities"

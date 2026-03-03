@@ -7,8 +7,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session 
 from sqlalchemy.exc import IntegrityError
 
-from app.modules.auth.models import RefreshToken
-from app.modules.user.models import User 
+from app.features.auth.models import RefreshToken
+from app.features.user.models import User 
 from .schemas import UserLogin, UserResponse, UserTokenResponse
 
 from app.infrastructure.database import get_db
@@ -166,8 +166,7 @@ async def activate_user_account(username:str, db:Session = Depends(get_db)):
 		)
 
 	user.is_active=True
-	db.commit()
-	db.refresh(user)
+	db.flush()
 	return user
 
 
@@ -176,7 +175,7 @@ async def delete_refresh_tokens(user_id: UUID, db:Session=Depends(get_db)):
 	tokens = db.query(RefreshToken).filter_by(user_id=user_id).all()
 	for token in tokens:
 		db.delete(token)
-	db.commit()
+	db.flush()
 	return {"message": f"Deleted {len(tokens)} refresh tokens for user {user_id}"}
 
 @auth_router.delete("/refresh-tokens")
