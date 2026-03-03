@@ -191,6 +191,7 @@ class Course(Base):
 
     # Relationship with Student through StudentCourse
     questions = relationship("Question", back_populates="course")
+    chapters = relationship("Chapter", back_populates="course", cascade="all, delete")
 
     # 2. The Proxy: This allows you to do `course.students` 
     # It fetches the 'student' attribute from every 'StudentCourse' object.
