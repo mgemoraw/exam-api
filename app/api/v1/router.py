@@ -12,7 +12,7 @@ v1_router = APIRouter(
 )
 
 v1_router.include_router(auth_router,)
-v1_router.include_router(exam_router, prefix="/exams", tags=["Exams"])
+v1_router.include_router(exam_router, )
 v1_router.include_router(user_router, prefix="/users", tags=["Users"])
 v1_router.include_router(question_router,)
 v1_router.include_router(school_router,)

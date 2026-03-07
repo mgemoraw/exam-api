@@ -186,6 +186,20 @@ async def get_programs(db: Session=Depends(get_db)):
     programs = db.query(Program).all()
     return programs
 
+
+@school_router.get("/programs/{program_id}", response_model=ProgramResponse)
+async def get_programs(program_id: str, db: Session=Depends(get_db)):
+    try:
+        program = db.query(Program).filter(Program.id==program_id).first()
+        return program 
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Program not found!"
+        )
+        
+
 @school_router.post("/programs", response_model=ProgramResponse)
 async def create_program(program: ProgramCreateRequest, db:Session=Depends(get_db)):
     existing = db.query(Program).filter(Program.name==program.name).first()

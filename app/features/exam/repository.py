@@ -25,3 +25,7 @@ class ExamRepository:
 
     def delete(self, exam: Exam):
         self.db.delete(exam)
+
+    def update(self, exam:Exam):
+        self.db.add(exam)
+        return exam 

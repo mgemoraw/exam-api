@@ -9,3 +9,5 @@ class QuestionRepository(BaseRepository[Question]):
         super().__init__(Question, db)
 
     
+    
+    

@@ -1,14 +1,15 @@
 from app.infrastructure.cache_manager import CacheManager
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 from app.infrastructure.redis import redis_client
 from app.infrastructure.cache_utils import serialize, deserialize
+from app.models.question import Question
 from .repository import ExamRepository
 from .models import Exam
-from .exceptions import ExamNotFoundError, ExamAlreadyExistsError
-from .schemas import ExamResponse, ExamCreateRequest
+from .exception import ExamNotFoundError, ExamAlreadyExistsError
+from .schemas import ExamResponse, ExamCreateRequest, ExamUpdateRequest
 from ..school.models import Program 
 class ExamService:
 
@@ -50,6 +51,17 @@ class ExamService:
     #         })
     #     )
 
+    # async def get_exam(self, exam_id):
+    #     cache_key = f"exam:{exam_id}"
+
+    #     cached = await self.cache.get(cache_key)
+    #     if cached:
+    #         return cached
+
+    #     exam = await self.repo.get_exam(exam_id)
+    #     await self.cache.set(cache_key, exam.json(), ttl=600)
+    #     return exam
+
     def get_exams(self, skip=False, limit=20):
         return self.repo.list(skip=False, limit=limit)
 
@@ -87,18 +99,18 @@ class ExamService:
 
     def create_exam(self, exam_data: ExamCreateRequest) -> Exam:
         # 🔹 1. Business validations
-        program = self.db.query(Program).filter(Program.name==exam_data.program).first()
+        program = self.db.query(Program).filter(Program.id==exam_data.program_id).first()
         if not program:
-            raise ValueError("Program not registered. please select a valid program")
+            raise ValueError(f"Program [{exam_data.program_id}] not registered. please select a valid program")
         if exam_data.maximum_marks <= 0:
             raise ValueError("Maximum marks must be greater than zero.")
 
         if exam_data.duration_minutes <= 0:
             raise ValueError("Duration must be greater than zero.")
 
-        if exam_data.start_time and exam_data.end_time:
-            if exam_data.end_time <= exam_data.start_time:
-                raise ValueError("End time must be after start time.")
+        # if exam_data.start_time and exam_data.end_time:
+        #     if exam_data.end_time <= exam_data.start_time:
+        #         raise ValueError("End time must be after start time.")
 
         # 🔹 2. Prevent duplicate title (optional but recommended)
         existing = self.repo.get_by_title(exam_data.title)
@@ -113,6 +125,7 @@ class ExamService:
             program_id=program.id,
             maximum_marks=exam_data.maximum_marks,
             duration_minutes=exam_data.duration_minutes,
+            duration=exam_data.duration,
             is_visible=exam_data.is_visible,
             exam_type=exam_data.exam_type,
             description=exam_data.description,
@@ -132,17 +145,39 @@ class ExamService:
             self.db.rollback()
             raise
 
-
-    # async def get_exam(self, exam_id):
-    #     cache_key = f"exam:{exam_id}"
-
-    #     cached = await self.cache.get(cache_key)
-    #     if cached:
-    #         return cached
-
-    #     exam = await self.repo.get_exam(exam_id)
-    #     await self.cache.set(cache_key, exam.json(), ttl=600)
-    #     return exam
     
+    def update_exam(self, exam_id: str, exam_data: ExamUpdateRequest):
+        existing = self.db.query(Exam).filter(Exam.id==exam_id).first()
+        if not existing:
+            raise ValueError("Exam not found!")
+        
+        updated_exam = Exam(
+            title=exam_data.title,
+            program_id=exam_data.program_id,
+            maximum_marks=exam_data.maximum_marks,
+            duration_minutes=exam_data.duration_minutes,
+            duration=exam_data.duration,
+            is_visible=exam_data.is_visible,
+            exam_type=exam_data.exam_type,
+            description=exam_data.description,
+            start_time=exam_data.start_time,
+            end_time=exam_data.end_time,
+            updated_at = datetime.now(timezone.utc),
+        )
+        self.repo.update(exam_data)
 
-    
+    def add_questions(self, exam_id: str,  question_ids):
+        exam = self.db.query(Exam).filter(Exam.id==exam_id).first()
+        if not exam:
+            raise ExamNotFoundError
+
+        if not isinstance(question_ids, list):
+            raise ValueError("Questions are not in proper format")
+        
+        questions = self.db.query(Question).filter(
+            Question.id.in_(question_ids)
+        ).all()
+
+        exam.questions.extend(questions)
+        return exam 
+        

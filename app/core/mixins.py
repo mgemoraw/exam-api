@@ -20,8 +20,12 @@ class SlugMixin:
 
         return slugify(source_value)
 
+ 
+
 
 @event.listens_for(SlugMixin, "before_insert", propagate=True)
 def auto_generate_slug(mapper, connection, target):
     if not getattr(target, "slug", None):
         target.slug = target.generate_slug(target)
+
+

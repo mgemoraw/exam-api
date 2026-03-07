@@ -15,7 +15,6 @@ from app.infrastructure.base import Base
 
 
 
-
 class Question(Base):
     
     __tablename__ = "questions"

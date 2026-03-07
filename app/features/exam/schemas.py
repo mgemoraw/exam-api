@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Literal, Optional, List, Dict
 from uuid import uuid4, UUID
 from enum import Enum
 from app.models.exam import ExamTypeEnum
+from app.features.school.schemas import ProgramResponse
 
 class ExamRequest(BaseModel):
     pass 
@@ -11,26 +12,42 @@ class ExamRequest(BaseModel):
 
 class ExamCreateRequest(BaseModel):
     title: str
-    program: str
+    program_id: str
     maximum_marks: int = 100
     duration_minutes: int
+    duration: Optional[timedelta] = Field(...,description="Exam Duration in minutes")
     is_visible: bool = False
     exam_type: ExamTypeEnum = ExamTypeEnum.MODEL_EXIT_EXAM
     description: Optional[str] = None
     start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
 
     # class Config:
     #     from_attributes = True
     model_config=ConfigDict(from_attributes=True)
 
+    @property
+    def end_time(self):
+        return self.start_time + timedelta(minutes=self.duration_minutes)
+
+    @field_validator("duration", mode="before")
+    @classmethod
+    def convert_minutes_to_timedelta(cls, v):
+        # if user sends integer int converts to minutes
+        if isinstance(v, (int, float)):
+            return timedelta(minutes=v)
+        
+        return v
+    
+
 
 class ExamResponse(BaseModel):
     id: UUID | str
     title: str
-    program: str
-    maximum_marks: int
-    duration_minutes: int
+    # program: Optional['ProgramResponse']=None
+    program_id: Optional[str]
+    maximum_marks: Optional[int]
+    duration_minutes: Optional[int]
+    duration: Optional[timedelta]
     exam_type: ExamTypeEnum
     description: Optional[str]
     is_visible: bool
@@ -41,7 +58,24 @@ class ExamResponse(BaseModel):
     questions: Optional[List['ExamQuestionResponse']] = None
     model_config=ConfigDict(from_attributes=True)
 
-
+class ExamUpdateRequest(BaseModel):
+    id: UUID | str
+    title: str
+    # program: Optional['ProgramResponse']=None
+    program_id: Optional[str]
+    maximum_marks: Optional[int]
+    duration_minutes: Optional[int]
+    duration: Optional[timedelta]
+    exam_type: ExamTypeEnum
+    description: Optional[str]
+    is_visible: bool
+    start_time: Optional[datetime]
+    end_time: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
+    questions: Optional[List['ExamQuestionResponse']] = None
+    model_config=ConfigDict(from_attributes=True)
+    
 class ExamQuestionResponse(BaseModel):
     id: UUID | str
     question: 'QuestionResponse'

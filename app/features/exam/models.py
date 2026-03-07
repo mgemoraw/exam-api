@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr
 from uuid import UUID
 from typing import Optional, List
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Mapped, mapped_column
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, Float, Text, Enum as SQLEnum, JSON
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, Float, Text, Enum as SQLEnum, JSON, Interval, Computed
 
 from datetime import datetime
 from enum import Enum
@@ -32,13 +32,15 @@ class Exam(Base):
     title: Mapped[str] = Column(String(255), nullable=False)
     program_id: Mapped[str] = mapped_column(String(36), ForeignKey('programs.id'), nullable=False)
     maximum_marks: Mapped[int] = Column(Integer, default=100, nullable=False)
+    duration = Column(Interval, nullable=False)
     duration_minutes: Mapped[int] = Column(Integer, nullable=False)
     exam_type = Column(SQLEnum(ExamTypeEnum), server_default=ExamTypeEnum.MODEL_EXIT_EXAM.value, nullable=False)
 
     description: Optional[str] = Column(String, nullable=True)
     is_visible = Column(Boolean, default=False)
     start_time = Column(DateTime, nullable=True) # when exam becomes visible
-    end_time = Column(DateTime, nullable=True)   # when exam closes
+    end_time = Column(DateTime, nullable=False, index=True,)  # when exam closes
+    # end_time = Column(DateTime, Computed("start_time + (duration_minutes * interval '1 minute')", persisted=True), nullable=False, index=True,)
     created_at = Column(DateTime, default=datetime.utcnow())
     created_by: Mapped[str] = Column(String(36), ForeignKey('users.id'), nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow())
@@ -48,6 +50,8 @@ class Exam(Base):
     attempts: Mapped[List['ExamAttempt']] = relationship('ExamAttempt', back_populates='exam', foreign_keys='ExamAttempt.exam_id')
     user:Mapped['User'] = relationship('User', back_populates='created_exams', foreign_keys=[created_by])
     program: Mapped['Program'] = relationship('Program', back_populates='exams', foreign_keys=[program_id])
+
+    
 
 class ExamQuestion(Base):
     __tablename__ = "exam_questions"
