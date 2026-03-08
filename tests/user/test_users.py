@@ -29,7 +29,7 @@ def test_create_user_existing_username(client, test_user):
     """Test user creation with existing username."""
     response = client.post(
         "/users/create",
-        json={
+        json={ 
             "username": TEST_USERNAME,
             "email": "test@example.com",
             "password": TEST_PASSWORD
