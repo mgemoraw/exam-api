@@ -26,6 +26,8 @@ from app.api.v1.router import v1_router
 from app.middleware.auth_middleware import auth_middleware
 from app.middleware.logging_middleware import LoggingMiddleware, app_logging_middleware
 
+# In main.py
+from app.web import router as frontend_router
 
 
 PRODUCTION = False # make it True for production
@@ -90,11 +92,11 @@ app.middleware("http")(app_logging_middleware)
 #     Base.metadata.create_all(bind=engine)
 
 
-@app.get("/")
-async def root():
-    payload = {"message": "Welcome to the Exam API"}
+# @app.get("/")
+# async def root():
+#     payload = {"message": "Welcome to the Exam API"}
     
-    return payload
+#     return payload
 
 @app.get("/health")
 async def health_check():
@@ -123,6 +125,7 @@ async def redis_test():
 
 
 app.include_router(v1_router, prefix="/api")
+app.include_router(frontend_router)  # Frontend at /
 
 
 

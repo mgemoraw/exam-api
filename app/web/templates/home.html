@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Avery Production - Home{% endblock %}
+
+{% block description %}Welcome to Avery Production - High-quality FastAPI applications{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/home.css') }}">
+{% endblock %}
+
+{% block body_class %}home-page{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="hero-title-main">Avery Production</span>
+                <span class="hero-title-sub">Built with FastAPI & Jinja2</span>
+            </h1>
+            <p class="hero-description">
+                Production-ready template with modern best practices, 
+                responsive design, and optimized performance.
+            </p>
+            <div class="hero-buttons">
+                <a href="/get-started" class="btn btn-primary btn-large">Get Started</a>
+                <a href="/docs" class="btn btn-secondary btn-large">Documentation</a>
+            </div>
+        </div>
+        <div class="hero-stats" id="stats-container">
+            <!-- Stats loaded dynamically via JS -->
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <h2 class="section-title">Why Choose Avery</h2>
+        <div class="features-grid" id="features-grid">
+            <div class="feature-card" data-feature="performance">
+                <div class="feature-icon">⚡</div>
+                <h3>High Performance</h3>
+                <p>ASGI-based FastAPI backend with async support for lightning-fast responses.</p>
+            </div>
+            <div class="feature-card" data-feature="security">
+                <div class="feature-icon">🔒</div>
+                <h3>Security First</h3>
+                <p>CSRF protection, secure headers, and production-grade security practices.</p>
+            </div>
+            <div class="feature-card" data-feature="responsive">
+                <div class="feature-icon">📱</div>
+                <h3>Fully Responsive</h3>
+                <p>Mobile-first design that looks great on all devices and screen sizes.</p>
+            </div>
+            <div class="feature-card" data-feature="seo">
+                <div class="feature-icon">🎯</div>
+                <h3>SEO Optimized</h3>
+                <p>Semantic HTML, meta tags, and structured data for better search rankings.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-card">
+            <h2>Ready to get started?</h2>
+            <p>Join thousands of developers using Avery Production template.</p>
+            <form action="/subscribe" method="POST" class="subscribe-form" id="subscribe-form">
+                <input type="email" name="email" placeholder="Enter your email" required aria-label="Email address">
+                <button type="submit" class="btn btn-primary">Subscribe</button>
+            </form>
+            <div id="form-message" class="form-message" aria-live="polite"></div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', path='js/home.js') }}" defer></script>
+{% endblock %}
