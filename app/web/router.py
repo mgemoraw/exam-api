@@ -25,6 +25,20 @@ router = APIRouter(prefix="", tags=["frontend"])
 # Import the simplified context creator
 from .dependencies import create_template_context
 
+
+def flash(request, message: str, category: str = "info"):
+    messages = request.session.get("flash_messages", [])
+    messages.append({
+        "category": category,
+        "message": message
+    })
+    request.session["flash_messages"] = messages
+
+def get_flashed_messages(request):
+    messages = request.session.pop("flash_messages", [])
+    return messages
+
+
 # Helper function to render templates
 async def render(request: Request, template_name: str, extra_context: dict = None):
     """Simple template rendering helper"""
@@ -39,7 +53,8 @@ async def render(request: Request, template_name: str, extra_context: dict = Non
 
 @router.get("/", response_class=HTMLResponse, name="home")
 async def home(request: Request):
-    return await render(request, "home.html")
+    messages = get_flashed_messages(request)
+    return await render(request, "home.html", {"messages": messages})
 
 @router.get("/about", response_class=HTMLResponse, name="about")
 async def about(request: Request):

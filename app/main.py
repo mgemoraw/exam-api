@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+# from starlette.middleware.sessions import SessionMiddleware
+
 from contextlib import asynccontextmanager
 
 # import redis
@@ -11,7 +14,7 @@ from app.infrastructure.database import engine
 # from app.models import Base
 from app.infrastructure.base import Base 
 from app.core.logger import setup_logging, logger
-
+from app.core.config import settings
 
 # from app.api.routes.user import  user_router
 # from app.api.routes.auth import auth_router
@@ -80,6 +83,15 @@ app = FastAPI(
     title="Exam API",
     version="1.2.0",
     )
+
+app.mount("/static", StaticFiles(directory="app/web/static"), name="static")
+
+
+# app.add_middleware(
+#     SessionMiddleware,
+#     secret_key=settings.SECRET_KEY
+# )
+
 
 app.middleware("http")(auth_middleware)
 

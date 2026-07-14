@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Form, Body, Request
 from fastapi.exceptions import HTTPException
 from uuid import UUID, uuid4
 from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session 
 from sqlalchemy.exc import IntegrityError
 
